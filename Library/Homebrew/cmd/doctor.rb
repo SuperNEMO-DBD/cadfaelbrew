@@ -890,9 +890,9 @@ def check_git_origin
       Without a correctly configured origin, Homebrew won't update
       properly. You can solve this by adding the Homebrew remote:
         cd #{HOMEBREW_REPOSITORY}
-        git remote add origin https://github.com/Homebrew/#{OS::GITHUB_REPOSITORY}.git
+        git remote add origin https://github.com/#{OS::GITHUB_USER}/#{OS::GITHUB_REPOSITORY}.git
       EOS
-    elsif origin !~ /(mxcl|Homebrew)\/#{OS::GITHUB_REPOSITORY}(\.git)?$/ then <<-EOS.undent
+    elsif origin !~ /(#{OS::GITHUB_USER})\/#{OS::GITHUB_REPOSITORY}(\.git)?$/ then <<-EOS.undent
       Suspicious git origin remote found.
 
       With a non-standard origin, Homebrew won't pull updates from
@@ -901,7 +901,7 @@ def check_git_origin
 
       Unless you have compelling reasons, consider setting the
       origin remote to point at the main repository, located at:
-        https://github.com/Homebrew/#{OS::GITHUB_REPOSITORY}.git
+        https://github.com/#{OS::GITHUB_USER}/#{OS::GITHUB_REPOSITORY}.git
       EOS
     end
   end

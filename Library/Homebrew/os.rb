@@ -7,14 +7,14 @@ module OS
     /linux/i === RUBY_PLATFORM
   end
 
+  GITHUB_USER = "SuperNEMO-DBD"
+  GITHUB_REPOSITORY = "cadfaelbrew"
+  ISSUES_URL = "https://github.com/#{GITHUB_USER}/#{GITHUB_REPOSITORY}/blob/master/share/doc/homebrew/Troubleshooting.md#troubleshooting"
+
   if OS.mac?
-    GITHUB_REPOSITORY = "homebrew"
-    ISSUES_URL = "https://git.io/brew-troubleshooting"
     PATH_OPEN = "/usr/bin/open"
     PATH_PATCH = "/usr/bin/patch"
   elsif OS.linux?
-    GITHUB_REPOSITORY = "linuxbrew"
-    ISSUES_URL = "https://github.com/Homebrew/#{GITHUB_REPOSITORY}/blob/master/share/doc/homebrew/Troubleshooting.md#troubleshooting"
     PATH_OPEN = "xdg-open"
     PATH_PATCH = "patch"
   else
