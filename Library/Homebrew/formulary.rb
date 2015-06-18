@@ -212,9 +212,14 @@ class Formulary
       return FromPathLoader.new(ref)
     end
 
-    formula_with_that_name = core_path(ref)
-    if formula_with_that_name.file?
-      return FormulaLoader.new(ref, formula_with_that_name)
+    # Determine loader preferring taps, then aliases, then core.
+    # This should (famous last words....) help cadfaelbrew to always
+    # use its tap formulae in first preference over the core.
+    possible_tap_formulae = tap_paths(ref)
+    if possible_tap_formulae.size > 1
+      raise TapFormulaAmbiguityError.new(ref, possible_tap_formulae)
+    elsif possible_tap_formulae.size == 1
+      return FormulaLoader.new(ref, possible_tap_formulae.first)
     end
 
     possible_alias = Pathname.new("#{HOMEBREW_LIBRARY}/Aliases/#{ref}")
@@ -222,11 +227,9 @@ class Formulary
       return AliasLoader.new(possible_alias)
     end
 
-    possible_tap_formulae = tap_paths(ref)
-    if possible_tap_formulae.size > 1
-      raise TapFormulaAmbiguityError.new(ref, possible_tap_formulae)
-    elsif possible_tap_formulae.size == 1
-      return FormulaLoader.new(ref, possible_tap_formulae.first)
+    formula_with_that_name = core_path(ref)
+    if formula_with_that_name.file?
+      return FormulaLoader.new(ref, formula_with_that_name)
     end
 
     possible_cached_formula = Pathname.new("#{HOMEBREW_CACHE_FORMULA}/#{ref}.rb")
