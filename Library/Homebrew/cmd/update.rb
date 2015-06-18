@@ -15,6 +15,9 @@ module Homebrew
     cd HOMEBREW_REPOSITORY
     git_init_if_necessary
 
+    # Ensure our required taps are tapped
+    install_tap("SuperNEMO-DBD", "cadfael")
+
     # migrate to new directories based tap structure
     migrate_taps
 

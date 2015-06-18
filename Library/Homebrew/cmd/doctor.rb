@@ -1234,6 +1234,20 @@ end
     s
   end
 
+  def check_supernemo_taps
+    tap = Tap.new "SuperNEMO-DBD", "cadfael"
+    unless tap.installed?
+    <<-EOS.undent
+      SuperNEMO-DBD Formula taps are untapped
+      It's possible you updated cadfaelbrew before running doctor, so simply run
+
+        brew update
+
+      to both update brew and automatically tap any needed Formula repos.
+      EOS
+    end
+  end
+
   def all
     methods.map(&:to_s).grep(/^check_/)
   end
