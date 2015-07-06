@@ -94,7 +94,7 @@ class Python < Formula
     args << (OS.mac? ? "--enable-framework=#{frameworks}" : "--enable-shared")
     args << "--without-gcc" if ENV.compiler == :clang
 
-    unless MacOS::CLT.installed?
+    if OS.mac? && !MacOS::CLT.installed?
       # Help Python's build system (setuptools/pip) to build things on Xcode-only systems
       # The setup.py looks at "-isysroot" to get the sysroot (and not at --sysroot)
       cflags = "CFLAGS=-isysroot #{MacOS.sdk_path}"
@@ -106,6 +106,18 @@ class Python < Formula
       end
       args << cflags
       args << ldflags
+    elsif OS.linux?
+      # Help Python's buildsystem use brewed versions of packages
+      hints = ["openssl"]
+      hints << "readline" if build.with? "readline"
+      hints << "sqlite" if build.with? "sqlite"
+      hints << "gdbm" if build.with? "gdbm"
+      hints << "tcl-tk" if build.with? "tcl-tk"
+      hint_includes = hints.map { |f| "-I#{Formula[f].opt_include}" }
+      hint_libs = hints.map { |f| "-L#{Formula[f].opt_lib}" }
+      cppflags = "CPPFLAGS=#{hint_includes.join " "}"
+      ldflags = "LDFLAGS=#{hint_libs.join " "}"
+      args << cppflags << ldflags
     end
 
     # Avoid linking to libgcc https://code.activestate.com/lists/python-dev/112195/
@@ -113,9 +125,10 @@ class Python < Formula
 
     # We want our readline and openssl! This is just to outsmart the detection code,
     # superenv handles that cc finds includes/libs!
+    dynamic_libext = OS.linux? ? "so" : "dylib"
     inreplace "setup.py" do |s|
       s.gsub! "do_readline = self.compiler.find_library_file(lib_dirs, 'readline')",
-              "do_readline = '#{Formula["readline"].opt_lib}/libhistory.dylib'"
+              "do_readline = '#{Formula["readline"].opt_lib}/libhistory.#{dynamic_libext}'"
       s.gsub! "/usr/local/ssl", Formula["openssl"].opt_prefix
     end
 
