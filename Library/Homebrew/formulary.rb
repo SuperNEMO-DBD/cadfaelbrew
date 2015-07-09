@@ -179,7 +179,7 @@ class Formulary
 
     tap = Tab.for_keg(keg).tap
 
-    if tap.nil? || tap == "Homebrew/homebrew" || tap == "mxcl/master"
+    if tap.nil? || tap == "SuperNEMO-DBD/cadfaelbrew" || tap == "Homebrew/homebrew" || tap == "mxcl/master"
       factory(rack.basename.to_s, spec)
     else
       factory("#{tap.sub("homebrew-", "")}/#{rack.basename}", spec)
