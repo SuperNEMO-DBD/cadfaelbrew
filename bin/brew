@@ -22,6 +22,9 @@ BREW_LIBRARY_DIRECTORY=$(chdir "$BREW_FILE_DIRECTORY"/../Library && pwd -P)
 unset GEM_HOME
 unset GEM_PATH
 
+# In case we use brewed Ruby, ensure PATH contains our bin dir
+PATH="$BREW_FILE_DIRECTORY":"$PATH"
+
 BREW_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 if [ "$BREW_SYSTEM" = "darwin" ]
 then
