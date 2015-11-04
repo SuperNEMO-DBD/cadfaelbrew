@@ -28,7 +28,9 @@ Dependencies
 
 * **Ruby** 1.8.6 or newer
 + **GCC** 4.2 or newer
-+ 64-bit x86 platform
+* **Git** 1.7.12.4 or newer
++ **Linux** 2.6.16 or newer
++ **64-bit x86** or **32-bit ARM** platform
 
 Paste at a Terminal prompt:
 
@@ -46,7 +48,7 @@ sudo yum groupinstall 'Development Tools' && sudo yum install curl git irb m4 ru
 
 ### 32-bit x86 platforms
 
-Linuxbrew does not currently support 32-bit x86 platforms nor platforms other than x86. It would be possible for Linuxbrew to work on 32-bit x86 platforms with some effort. Pull requests would be welcome if someone were to volunteer to maintain the 32-bit x86 support.
+Linuxbrew does not currently support 32-bit x86 platforms. It would be possible for Linuxbrew to work on 32-bit x86 platforms with some effort. Pull requests would be welcome if someone were to volunteer to maintain the 32-bit x86 support.
 
 Installation
 ------------
@@ -99,24 +101,21 @@ Many of the Homebrew formulae work on either Mac or Linux without changes, but s
 ## Security
 Please report security issues to security@brew.sh.
 
+This is our PGP key which is valid until June 17, 2016.
+* Key ID: `0xE33A3D3CCE59E297`
+* Fingerprint: `C657 8F76 2E23 441E C879  EC5C E33A 3D3C CE59 E297`
+* Full key: https://keybase.io/homebrew/key.asc
+
 ## Who Are You?
 Linuxbrew is maintained by [Shaun Jackman](https://github.com/sjackman).
 
-Homebrew's current maintainers are [Misty De Meo](https://github.com/mistydemeo), [Adam Vandenberg](https://github.com/adamv), [Jack Nagel](https://github.com/jacknagel), [Xu Cheng](https://github.com/xu-cheng), [Mike McQuaid](https://github.com/mikemcquaid), [Baptiste Fontaine](https://github.com/bfontaine), [Brett Koonce](https://github.com/asparagui), [Dominyk Tiller](https://github.com/DomT4) and [Tim Smith](https://github.com/tdsmith).
+Homebrew's current maintainers are [Misty De Meo](https://github.com/mistydemeo), [Adam Vandenberg](https://github.com/adamv), [Xu Cheng](https://github.com/xu-cheng), [Mike McQuaid](https://github.com/mikemcquaid), [Baptiste Fontaine](https://github.com/bfontaine), [Brett Koonce](https://github.com/asparagui), [Dominyk Tiller](https://github.com/DomT4), [Tim Smith](https://github.com/tdsmith) and [Alex Dunn](https://github.com/dunn).
 
 Homebrew was originally created by [Max Howell](https://github.com/mxcl).
 
 ## License
 Code is under the [BSD 2 Clause (NetBSD) license](https://github.com/Homebrew/homebrew/tree/master/LICENSE.txt).
-
-## Donations
-We accept tips through Gratipay.
-
-### Shaun Jackman for Linuxbrew
-[![Gratipay](https://img.shields.io/gratipay/sjackman.svg?style=flat)](https://gratipay.com/sjackman/)
-
-### Homebrew
-[![Gratipay](https://img.shields.io/gratipay/Homebrew.svg?style=flat)](https://gratipay.com/Homebrew/)
+Documentation is under the [Creative Commons Attribution license](https://creativecommons.org/licenses/by/4.0/).
 
 ## Sponsors
 Our CI infrastructure was paid for by [our Kickstarter supporters](https://github.com/Homebrew/homebrew/blob/master/SUPPORTERS.md).

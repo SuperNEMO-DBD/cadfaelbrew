@@ -1,8 +1,8 @@
 class Carthage < Formula
   desc "Decentralized dependency manager for Cocoa"
   homepage "https://github.com/Carthage/Carthage"
-  url "https://github.com/Carthage/Carthage.git", :tag => "0.7.4-homebrew",
-                                                  :revision => "199d3b3dfd5a5ce7aeb919eb9206b7faf1374e20",
+  url "https://github.com/Carthage/Carthage.git", :tag => "0.8",
+                                                  :revision => "52e1a006158793eff3c9890f1934f0b7cb64d2b8",
                                                   :shallow => false
   head "https://github.com/Carthage/Carthage.git", :shallow => false
 
@@ -10,7 +10,7 @@ class Carthage < Formula
 
   bottle do
     cellar :any
-    sha256 "64436bc00d57bdb6a814abf96db950cb34fc1c04a4d923204c802aa79e5bce78" => :yosemite
+    sha256 "538dbfb46af97c561845e9e11aa891eed68afb43b493ab8426cad4bfc271dd7b" => :yosemite
   end
 
   def install

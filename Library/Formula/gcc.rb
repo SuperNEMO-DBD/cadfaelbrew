@@ -21,15 +21,15 @@ class Gcc < Formula
 
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org"
-  url "http://ftpmirror.gnu.org/gcc/gcc-5.1.0/gcc-5.1.0.tar.bz2"
-  mirror "https://ftp.gnu.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.bz2"
-  sha256 "b7dafdf89cbb0e20333dbf5b5349319ae06e3d1a30bf3515b5488f7e89dca5ad"
+  url "http://ftpmirror.gnu.org/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
+  sha256 "5f835b04b5f7dd4f4d2dc96190ec1621b8d89f2dc6f638f9f8bc1b1014ba8cad"
 
   bottle do
     revision 2
-    sha256 "77f780600830699d4bfb9e6f14e3befd7a5511a7a4937d57ef665a58934972f8" => :yosemite
-    sha256 "8c156f6588eb4e83837635b42daa1b5e5d1b88097f0dbd679b0332874113cc97" => :mavericks
-    sha256 "77bce635f78bc26bd01010b5ece480251af223bf2dba6d48c29af6b29b441296" => :mountain_lion
+    sha256 "8d0a4eba3bc23ec88661011d6a94bd8674fc34279eaf17fae757ab29df88d4b5" => :el_capitan
+    sha256 "29f60430f6c8ed4dd8bb79a41353b40cdf220ada77f3190726a1feef35bf3f1e" => :yosemite
+    sha256 "d28b3a3ec68f8019991278eb1ce71794cadc02a4d96335732a2ea36bd0487561" => :mavericks
   end
 
   option "with-java", "Build the gcj compiler"
@@ -44,6 +44,7 @@ class Gcc < Formula
     option "with-multilib", "Build with multilib support"
   end
 
+  depends_on "zlib" unless OS.mac?
   depends_on "binutils" if build.with? "glibc"
   depends_on "glibc" => :optional
   depends_on "gmp"
@@ -77,13 +78,6 @@ class Gcc < Formula
   # Fix for libgccjit.so linkage on Darwin
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64089
   patch :DATA if OS.mac?
-
-  # Fix error: rpc/xdr.h: No such file or directory
-  # See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64839
-  patch :p0 do
-    url "https://gist.githubusercontent.com/anonymous/7f239960c46240d83a67/raw"
-    sha256 "6ae5488ae1f7f712a782d65fd2bba3bca6431054b6d8683886df3a2cbc003834"
-  end if OS.linux?
 
   def install
     # GCC will suffer build errors if forced to use a particular linker.
@@ -139,7 +133,7 @@ class Gcc < Formula
       "--with-build-config=bootstrap-debug",
       "--disable-werror",
       "--with-pkgversion=Homebrew #{name} #{pkg_version} #{build.used_options*" "}".strip,
-      "--with-bugurl=https://github.com/Homebrew/homebrew/issues",
+      "--with-bugurl=https://github.com/Homebrew/homebrew/issues"
     ]
 
     # "Building GCC with plugin support requires a host that supports
@@ -207,7 +201,7 @@ class Gcc < Formula
         "#{lib}/gcc/#{version_suffix}/logging.properties",
         "#{lib}/gcc/#{version_suffix}/security/classpath.security",
         "#{lib}/gcc/#{version_suffix}/i386/logging.properties",
-        "#{lib}/gcc/#{version_suffix}/i386/security/classpath.security",
+        "#{lib}/gcc/#{version_suffix}/i386/security/classpath.security"
       ]
       config_files.each do |file|
         add_suffix file, version_suffix if File.exist? file
@@ -338,3 +332,22 @@ index 44d0750..4df2a9c 100644
 
  $(LIBGCCJIT_SONAME_SYMLINK): $(LIBGCCJIT_FILENAME)
 	ln -sf $(LIBGCCJIT_FILENAME) $(LIBGCCJIT_SONAME_SYMLINK)
+diff --git a/gcc/jit/jit-playback.c b/gcc/jit/jit-playback.c
+index 925fa86..01cfd4b 100644
+--- a/gcc/jit/jit-playback.c
++++ b/gcc/jit/jit-playback.c
+@@ -2416,6 +2416,15 @@ invoke_driver (const char *ctxt_progname,
+      time.  */
+   ADD_ARG ("-fno-use-linker-plugin");
+
++#if defined (DARWIN_X86) || defined (DARWIN_PPC)
++  /* OS X's linker defaults to treating undefined symbols as errors.
++     If the context has any imported functions or globals they will be
++     undefined until the .so is dynamically-linked into the process.
++     Ensure that the driver passes in "-undefined dynamic_lookup" to the
++     linker.  */
++  ADD_ARG ("-Wl,-undefined,dynamic_lookup");
++#endif
++
+   /* pex argv arrays are NULL-terminated.  */
+   argvec.safe_push (NULL);

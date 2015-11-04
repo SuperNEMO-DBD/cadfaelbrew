@@ -1,6 +1,6 @@
 class Readline < Formula
   desc "Library for command-line editing"
-  homepage "http://tiswww.case.edu/php/chet/readline/rltop.html"
+  homepage "https://tiswww.case.edu/php/chet/readline/rltop.html"
   url "http://ftpmirror.gnu.org/readline/readline-6.3.tar.gz"
   mirror "https://ftp.gnu.org/gnu/readline/readline-6.3.tar.gz"
   sha256 "56ba6071b9462f980c5a72ab0023893b65ba6debb4eeb475d7a563dc65cafd43"
@@ -8,11 +8,12 @@ class Readline < Formula
 
   bottle do
     cellar :any
+    sha256 "9d38481c935cef21ead25c294285b78a9e8fa556fd15ede9126926c055c40d37" => :el_capitan
     sha1 "d8bec6237197bfff8535cd3ac10c18f2e4458a2a" => :yosemite
     sha1 "d530f4e966bb9c654a86f5cc0e65b20b1017aef2" => :mavericks
     sha1 "7473587d992d8c3eb37afe6c3e0adc3587c977f1" => :mountain_lion
     sha1 "e84f9cd95503b284651ef24bc8e7da30372687d3" => :lion
-    sha1 "86d5b9260720202a1eb4b43980f175264294dd1e" => :x86_64_linux
+    sha256 "0cf8e6ac481b5b99139f92783019b756a74756cd4720d60c5ae10e24d963d1d6" => :x86_64_linux
   end
 
   keg_only :shadowed_by_osx, <<-EOS.undent
@@ -20,6 +21,8 @@ class Readline < Formula
     In order to prevent conflicts when programs look for libreadline we are
     defaulting this GNU Readline installation to keg-only.
   EOS
+
+  depends_on "homebrew/dupes/ncurses" => :recommended unless OS.mac?
 
   # Vendor the patches.
   # The mirrors are unreliable for getting the patches, and the more patches
@@ -34,8 +37,11 @@ class Readline < Formula
 
   def install
     ENV.universal_binary
-    system "./configure", "--prefix=#{prefix}", "--enable-multibyte"
-    system "make", "install"
+    system "./configure", "--prefix=#{prefix}", "--enable-multibyte",
+      ("--with-curses" if build.with? "ncurses")
+    args = []
+    args << "SHLIB_LIBS=-lcurses" if build.with? "ncurses"
+    system "make", "install", *args
 
     # The 6.3 release notes say:
     #   When creating shared libraries on Mac OS X, the pathname written into the

@@ -1,38 +1,26 @@
 class ShadowsocksLibev < Formula
   desc "Libev port of shadowsocks"
   homepage "https://github.com/shadowsocks/shadowsocks-libev"
-  url "https://github.com/shadowsocks/shadowsocks-libev/archive/v2.2.1.tar.gz"
-  sha256 "c8013bc56e507855913dd8972f3c629c1b0c58a7012c4c459186d7f6a0cfe953"
+  url "https://github.com/shadowsocks/shadowsocks-libev/archive/v2.4.0.tar.gz"
+  sha256 "80e55840e4e3fb61f9ec13b2cad75acb1f5a39212a5141ff5751c6a147a3218b"
+  head "https://github.com/shadowsocks/shadowsocks-libev.git"
 
   bottle do
     cellar :any
-    sha256 "0d17f73152f9dc3cef85222a2c5ce2ed0b557e0aee528b736e7d7048a2211f90" => :yosemite
-    sha256 "ce02156eef98449192b89ddf461af130e692c008984f7763a33047b455fe96a9" => :mavericks
-    sha256 "70a1ec155396732f9e99278ffaad8951c7916d84febb40c80d225e199627ad1d" => :mountain_lion
+    sha256 "1443f6eef1c4984f458907168beef526c1172fa4f3df54c8880748e44aefa005" => :el_capitan
+    sha256 "cd1dde0eaec1c872c098b33dc540902693803fc85e2242d41720b3578f97fa3c" => :yosemite
+    sha256 "f87760e9d3e366bc4f81d0e129db617c13378b9f1fb4fca6a674956362eb158d" => :mavericks
   end
 
-  head "https://github.com/shadowsocks/shadowsocks-libev.git"
-
-  option "with-polarssl", "Use PolarSSL instead of OpenSSL"
-
-  depends_on "polarssl" => :optional
-  depends_on "openssl" if build.without? "polarssl"
+  depends_on "openssl"
 
   def install
     args = ["--prefix=#{prefix}"]
 
-    if build.with? "polarssl"
-      polarssl = Formula["polarssl"]
-
-      args << "--with-crypto-library=polarssl"
-      args << "--with-polarssl=#{polarssl.opt_prefix}"
-    end
-
     system "./configure", *args
     system "make"
 
-    bin.install "src/ss-local"
-    bin.install "src/ss-tunnel"
+    bin.install "src/ss-local", "src/ss-tunnel", "src/ss-server", "src/ss-manager"
 
     (buildpath/"shadowsocks-libev.json").write <<-EOS.undent
       {
@@ -46,8 +34,35 @@ class ShadowsocksLibev < Formula
     EOS
     etc.install "shadowsocks-libev.json"
 
-    inreplace "shadowsocks-libev.8", "/etc/shadowsocks-libev/config.json", "#{etc}/shadowsocks-libev.json"
-    man8.install "shadowsocks-libev.8"
+    rm "man/ss-redir.1"
+    inreplace Dir["man/*"], "/etc/shadowsocks-libev/config.json", "#{etc}/shadowsocks-libev.json"
+    man8.install Dir["man/*.8"]
+    man1.install Dir["man/*.1"]
+  end
+
+  test do
+    (testpath/"shadowsocks-libev.json").write <<-EOS.undent
+      {
+          "server":"127.0.0.1",
+          "server_port":9998,
+          "local":"127.0.0.1",
+          "local_port":9999,
+          "password":"test",
+          "timeout":600,
+          "method":"table"
+      }
+    EOS
+    server = fork { exec bin/"ss-server", "-c", testpath/"shadowsocks-libev.json" }
+    client = fork { exec bin/"ss-local", "-c", testpath/"shadowsocks-libev.json" }
+    sleep 3
+    begin
+      system "curl", "--socks5", "127.0.0.1:9999", "github.com"
+    ensure
+      Process.kill 9, server
+      Process.wait server
+      Process.kill 9, client
+      Process.wait client
+    end
   end
 
   plist_options :manual => "#{HOMEBREW_PREFIX}/opt/shadowsocks-libev/bin/ss-local -c #{HOMEBREW_PREFIX}/etc/shadowsocks-libev.json"

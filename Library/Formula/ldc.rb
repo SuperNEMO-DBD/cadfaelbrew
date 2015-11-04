@@ -1,21 +1,23 @@
-require "formula"
-
 class Ldc < Formula
   desc "Portable D programming language compiler"
   homepage "http://wiki.dlang.org/LDC"
-  url "https://github.com/ldc-developers/ldc/releases/download/v0.15.1/ldc-0.15.1-src.tar.gz"
-  sha1 "06db0c07d73bf714e6fc7a4aca4c44123e4a585a"
+  url "https://github.com/ldc-developers/ldc/releases/download/v0.15.2-beta2/ldc-0.15.2-beta2-src.tar.gz"
+  version "0.15.2-beta2"
+  sha256 "b421acbca0cdeef42c5af2bd53060253822dea6d78d216f973ee5e2b362723e2"
 
-  devel do
-    url "https://github.com/ldc-developers/ldc/releases/download/v0.15.2-beta1/ldc-0.15.2-beta1-src.tar.gz"
-    sha1 "cf5b22ea98f4905ad3ba468aedfdce78d194e59d"
-    version "0.15.2-beta1"
-  end
+  head "https://github.com/ldc-developers/ldc.git", :shallow => false
 
   bottle do
-    sha1 "bc329c6a0f9f52d634c99877a6c020436307b941" => :yosemite
-    sha1 "86d65479ffc178437ed3f0dd0ea05549eede13ed" => :mavericks
-    sha1 "7a89443907b3d2af67d46f273c0949f0a587c456" => :mountain_lion
+    revision 1
+    sha256 "fa6b927c78ab8c9e3654681896aa52dfb9429dc4c4eb159cc36104a8c195d440" => :el_capitan
+    sha256 "d881f7491f5e27659f4e6f1b12c363b99d02e73073b8003d6e648bebc1a53204" => :yosemite
+    sha256 "f5f1741065b18bdcd4051f29f4df5a93b85cee1e8c5e8a3598477c10d123be8e" => :mavericks
+  end
+
+  devel do
+    url "https://github.com/ldc-developers/ldc/releases/download/v0.16.0-beta2/ldc-0.16.0-beta2-src.tar.gz"
+    version "0.16.0-beta2"
+    sha256 "f5091e7de5d597865533e4c3cbc84d4b9c6d98cae49ccb14576be494e165f96f"
   end
 
   needs :cxx11
@@ -25,6 +27,10 @@ class Ldc < Formula
   depends_on "libconfig"
 
   def install
+    # Fix the error:
+    # CMakeFiles/LDCShared.dir/build.make:68: recipe for target 'dmd2/id.h' failed
+    ENV.deparallelize if OS.linux?
+
     ENV.cxx11
     mkdir "build"
     cd "build" do
@@ -43,9 +49,9 @@ class Ldc < Formula
       }
     EOS
 
-    system "#{bin}/ldc2", 'test.d'
+    system "#{bin}/ldc2", "test.d"
     system "./test"
-    system "#{bin}/ldmd2", 'test.d'
+    system "#{bin}/ldmd2", "test.d"
     system "./test"
   end
 end

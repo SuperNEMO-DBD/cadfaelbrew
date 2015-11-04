@@ -1,15 +1,18 @@
 class Dovecot < Formula
   desc "IMAP/POP3 server"
   homepage "http://dovecot.org/"
-  url "http://dovecot.org/releases/2.2/dovecot-2.2.16.tar.gz"
-  mirror "https://fossies.org/linux/misc/dovecot-2.2.16.tar.gz"
-  sha256 "56ce1287a17fa88a2083116db00200deff1a5390af5eac1c8ae3f59a2079cff0"
+  url "http://dovecot.org/releases/2.2/dovecot-2.2.18.tar.gz"
+  mirror "https://fossies.org/linux/misc/dovecot-2.2.18.tar.gz"
+  sha256 "b6d8468cea47f1227f47b80618f7fb872e2b2e9d3302adc107a005dd083865bb"
 
   bottle do
-    sha256 "c7e6a66e2c2feeaee294ce730d839476ea2ee8f6bd6e0be15d3de7f51d0c7c91" => :yosemite
-    sha256 "2f06258ea249f6f74d5ac21eb91456800936949ee9d92ce59baf524684c4c596" => :mavericks
-    sha256 "4dc666bce910531c1696c36b4082f69f6f0102cbc543c60595c686d7cc5fe45f" => :mountain_lion
+    revision 2
+    sha256 "7cd19bd919795c966252e4fe1208e82a45479b02dd2bc7af083a5076b4256b7f" => :el_capitan
+    sha256 "086923e8cbcda311630328f76df479b7362c2966d349f7e05b855404f6610d3f" => :yosemite
+    sha256 "23d888317ae30125f810ad24a2110af0f79be47e0104abecb5dd78a972803309" => :mavericks
   end
+
+  option "with-pam", "Build with PAM support"
 
   depends_on "openssl"
   depends_on "clucene" => :optional
@@ -28,8 +31,9 @@ class Dovecot < Formula
     ]
 
     args << "--with-lucene" if build.with? "clucene"
+    args << "--with-pam" if build.with? "pam"
 
-    system "./configure",  *args
+    system "./configure", *args
     system "make", "install"
   end
 
@@ -42,7 +46,7 @@ class Dovecot < Formula
       <dict>
         <key>Label</key>
         <string>#{plist_name}</string>
-        <key>OnDemand</key>
+        <key>KeepAlive</key>
         <false/>
         <key>RunAtLoad</key>
         <true/>
@@ -51,8 +55,10 @@ class Dovecot < Formula
           <string>#{opt_sbin}/dovecot</string>
           <string>-F</string>
         </array>
-        <key>ServiceDescription</key>
-        <string>Dovecot mail server</string>
+        <key>StandardErrorPath</key>
+        <string>#{var}/log/dovecot/dovecot.log</string>
+        <key>StandardOutPath</key>
+        <string>#{var}/log/dovecot/dovecot.log</string>
       </dict>
     </plist>
     EOS

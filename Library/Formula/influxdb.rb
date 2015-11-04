@@ -1,28 +1,46 @@
-require "formula"
 require "language/go"
 
 class Influxdb < Formula
   desc "Time series, events, and metrics database"
-  homepage "http://influxdb.com"
-  url "https://github.com/influxdb/influxdb/archive/v0.9.0.tar.gz"
-  sha256 "c7cc869754d7bfb9374b0a16a9b91073d9588adedbd7bfda1d5709e22d3a3d75"
+  homepage "https://influxdb.com"
+
+  stable do
+    url "https://github.com/influxdb/influxdb/archive/v0.9.4.2.tar.gz"
+    sha256 "aaea27228d7f242fe37d436506592189081beda0e7d2fba3f82c6b233fd913bc"
+  end
 
   bottle do
-    cellar :any
-    sha256 "26df716a5ae5271b06d54f33ea98b0ba9e733fa52de840d92c02a21e63e70375" => :yosemite
-    sha256 "646d615c01dafc81b17db5c6f646c4c0904bd8fb6e0c5d6cf7ef36a063fbb4b3" => :mavericks
-    sha256 "c9581f39e4904fa38609e140396e6e67b44080b26e7a26a3b2ae68e0a3b831ae" => :mountain_lion
+    cellar :any_skip_relocation
+    revision 1
+    sha256 "955863732e1586c3fb288d56e7808ebc53346f790e03d345dae77688a89c69d8" => :el_capitan
+    sha256 "50c8251182586ec99de1b19a764195fa0031c2deccd6db22c9710c342ea703a3" => :yosemite
+    sha256 "34c8890075df5936db6aaf3e27431bb7ba6117d8e72d8a3bea7bc618c7cc8e96" => :mavericks
+  end
+
+  head do
+    url "https://github.com/influxdb/influxdb.git"
+
+    go_resource "github.com/dgryski/go-bitstream" do
+      url "https://github.com/dgryski/go-bitstream.git", :revision => "8c62433445abdcf8c50094b3d67a15f728d8292b"
+    end
+
+    go_resource "github.com/dgryski/go-bits" do
+      url "https://github.com/dgryski/go-bits.git", :revision => "2c7641e7dfe3945a0fe755f58c85ab306624956d"
+    end
+
+    go_resource "github.com/jwilder/encoding" do
+      url "https://github.com/jwilder/encoding.git", :revision => "07d88d4f35eec497617bee0c7bfe651a796dae13"
+    end
   end
 
   depends_on "go" => :build
-  depends_on :hg => :build
 
   go_resource "github.com/BurntSushi/toml" do
     url "https://github.com/BurntSushi/toml.git", :revision => "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
   end
 
   go_resource "github.com/armon/go-metrics" do
-    url "https://github.com/armon/go-metrics.git", :revision => "b2d95e5291cdbc26997d1301a5e467ecbb240e25"
+    url "https://github.com/armon/go-metrics.git", :revision => "6c5fa0d8f48f4661c9ba8709799c88d425ad20f0"
   end
 
   go_resource "github.com/bmizerany/pat" do
@@ -30,15 +48,15 @@ class Influxdb < Formula
   end
 
   go_resource "github.com/boltdb/bolt" do
-    url "https://github.com/boltdb/bolt.git", :revision => "abb4088170cfac644ed5f4648a5cdc566cdb1da2"
+    url "https://github.com/boltdb/bolt.git", :revision => "51f99c862475898df9773747d3accd05a7ca33c1"
   end
 
   go_resource "github.com/gogo/protobuf" do
-    url "https://github.com/gogo/protobuf.git", :revision => "499788908625f4d83de42a204d1350fde8588e4f"
+    url "https://github.com/gogo/protobuf.git", :revision => "200875106f3bf0eb01eb297dae30b250a25ffc84"
   end
 
   go_resource "github.com/golang/protobuf" do
-    url "https://github.com/golang/protobuf.git", :revision => "34a5f244f1c01cdfee8e60324258cfbb97a42aec"
+    url "https://github.com/golang/protobuf.git", :revision => "3d2510a4dd961caffa2ae781669c628d82db700a"
   end
 
   go_resource "github.com/hashicorp/go-msgpack" do
@@ -46,7 +64,7 @@ class Influxdb < Formula
   end
 
   go_resource "github.com/hashicorp/raft" do
-    url "https://github.com/hashicorp/raft.git", :revision => "379e28eb5a538707eae7a97ecc60846821217f27"
+    url "https://github.com/hashicorp/raft.git", :revision => "9dabbbab966c04a0b6efed3cff6960299fed0642"
   end
 
   go_resource "github.com/hashicorp/raft-boltdb" do
@@ -54,11 +72,11 @@ class Influxdb < Formula
   end
 
   go_resource "github.com/kimor79/gollectd" do
-    url "https://github.com/kimor79/gollectd.git", :revision => "cf6dec97343244b5d8a5485463675d42f574aa2d"
+    url "https://github.com/kimor79/gollectd.git", :revision => "61d0deeb4ffcc167b2a1baa8efd72365692811bc"
   end
 
   go_resource "github.com/peterh/liner" do
-    url "https://github.com/peterh/liner.git", :revision => "1bb0d1c1a25ed393d8feb09bab039b2b1b1fbced"
+    url "https://github.com/peterh/liner.git", :revision => "b850cf8c6d0ee52309aad09ac610508c6c75e819"
   end
 
   go_resource "github.com/rakyll/statik" do
@@ -66,11 +84,19 @@ class Influxdb < Formula
   end
 
   go_resource "golang.org/x/crypto" do
-    url "https://go.googlesource.com/crypto.git", :revision => "1e856cbfdf9bc25eefca75f83f25d55e35ae72e0"
+    url "https://go.googlesource.com/crypto.git", :revision => "c8b9e6388ef638d5a8a9d865c634befdc46a6784"
   end
 
   go_resource "gopkg.in/fatih/pool.v2" do
     url "https://github.com/fatih/pool.git", :revision => "cba550ebf9bce999a02e963296d4bc7a486cb715"
+  end
+
+  go_resource "collectd.org" do
+    url "https://github.com/collectd/go-collectd.git", :revision => "9fc824c70f713ea0f058a07b49a4c563ef2a3b98"
+  end
+
+  go_resource "github.com/golang/snappy" do
+    url "https://github.com/golang/snappy.git", :revision => "723cc1e459b8eea2dea4583200fd60757d40097a"
   end
 
   def install
@@ -81,23 +107,28 @@ class Influxdb < Formula
     Language::Go.stage_deps resources, buildpath/"src"
 
     cd influxdb_path do
-      system "go", "install", "-ldflags", "-X main.version 0.9.0 -X main.commit 471117ce5b308e59f8f247d8a88a52ead553b602", "./..."
+      if build.head?
+        system "go", "install", "-ldflags", "-X main.version 0.9.5-HEAD -X main.branch master -X main.commit #{`git rev-parse HEAD`.strip}", "./..."
+      else
+        system "go", "install", "-ldflags", "-X main.version 0.9.4.1 -X main.branch 0.9.4 -X main.commit c4f85f84765e27bfb5e58630d0dea38adeacf543", "./..."
+      end
     end
 
     inreplace influxdb_path/"etc/config.sample.toml" do |s|
       s.gsub! "/var/opt/influxdb/data", "#{var}/influxdb/data"
       s.gsub! "/var/opt/influxdb/meta", "#{var}/influxdb/meta"
       s.gsub! "/var/opt/influxdb/hh", "#{var}/influxdb/hh"
+      s.gsub! "/var/opt/influxdb/wal", "#{var}/influxdb/wal"
     end
 
-    bin.install buildpath/"bin/influxd" => "influxd"
-    bin.install buildpath/"bin/influx" => "influx"
+    bin.install buildpath/"bin/influxd"
+    bin.install buildpath/"bin/influx"
     etc.install influxdb_path/"etc/config.sample.toml" => "influxdb.conf"
 
     (var/"influxdb/data").mkpath
-    (var/"influxdb/raft").mkpath
-    (var/"influxdb/state").mkpath
-    (var/"influxdb/logs").mkpath
+    (var/"influxdb/meta").mkpath
+    (var/"influxdb/hh").mkpath
+    (var/"influxdb/wal").mkpath
   end
 
   plist_options :manual => "influxd -config #{HOMEBREW_PREFIX}/etc/influxdb.conf"
@@ -130,6 +161,15 @@ class Influxdb < Formula
         <string>#{var}/log/influxdb.log</string>
       </dict>
     </plist>
+    EOS
+  end
+
+  def caveats; <<-EOS.undent
+    Config files from old InfluxDB versions are incompatible with version 0.9.
+    If upgrading from a pre-0.9 version, the new configuration file will be named:
+        #{etc}/influxdb.conf.default
+    To generate a new config file:
+        influxd config > influxdb.conf.generated
     EOS
   end
 end

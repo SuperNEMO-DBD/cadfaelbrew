@@ -1,14 +1,15 @@
 class Cassandra < Formula
   desc "Eventually consistent, distributed key-value store"
   homepage "https://cassandra.apache.org"
-  url "https://www.apache.org/dyn/closer.cgi?path=/cassandra/2.1.6/apache-cassandra-2.1.6-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/cassandra/2.1.6/apache-cassandra-2.1.6-bin.tar.gz"
-  sha256 "c2123b9d82b57868ad03c57720d9f4c99934fe292d571242a3b51337063409f7"
+  url "https://www.apache.org/dyn/closer.cgi?path=/cassandra/2.2.2/apache-cassandra-2.2.2-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/cassandra/2.2.2/apache-cassandra-2.2.2-bin.tar.gz"
+  sha256 "72faa82f1dadd40984e732918d069a55b79adf5e4ccd23d2651cbd20b0a34e80"
 
   bottle do
-    sha256 "c269d7d38965af4413351c296d8573fdd93594a9d4abf02a5c69ede3f6f07565" => :yosemite
-    sha256 "e8cf539dd5ed31edc0c5e174b6b11e5c34e731f48706277ac6d5ff286af16e41" => :mavericks
-    sha256 "f1c022d18a838e037e565584eb1f72780be8128f56b26ebf25ac2ff733b0d503" => :mountain_lion
+    revision 1
+    sha256 "d6119d0ed97cf13a669bd9320e02457b210529d3738597254a8e56756b1e7484" => :el_capitan
+    sha256 "13b5bea82ee66a4ab14ca0c9a74acc6573171c724bff52c0606ffe0e4d04bca6" => :yosemite
+    sha256 "67fbda0d172bfc35da1da4d50cf633f14ad39f1c2ad5d56b7d68145d271d6ac5" => :mavericks
   end
 
   depends_on :python if MacOS.version <= :snow_leopard
@@ -40,8 +41,8 @@ class Cassandra < Formula
   end
 
   resource "cassandra-driver" do
-    url "https://pypi.python.org/packages/source/c/cassandra-driver/cassandra-driver-2.5.1.tar.gz"
-    sha256 "98511b51f3565bf5836079ed31b7be681d5a17b5a98d1214aa64eb06e07bc18d"
+    url "https://pypi.python.org/packages/source/c/cassandra-driver/cassandra-driver-2.6.0.tar.gz"
+    sha256 "753505a02b4c6f9b5ef18dec36a13f17fb458c98925eea62c94a8839d5949717"
   end
 
   def install
@@ -83,7 +84,7 @@ class Cassandra < Formula
 
     share.install [libexec+"bin/cassandra.in.sh", libexec+"bin/stop-server"]
     inreplace Dir["#{libexec}/bin/cassandra*", "#{libexec}/bin/debug-cql", "#{libexec}/bin/nodetool", "#{libexec}/bin/sstable*"],
-              /`dirname "?\$0"?`\/cassandra.in.sh/,
+              %r{`dirname "?\$0"?`/cassandra.in.sh},
               "#{share}/cassandra.in.sh"
 
     bin.write_exec_script Dir["#{libexec}/bin/*"]

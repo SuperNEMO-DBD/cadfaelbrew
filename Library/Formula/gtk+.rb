@@ -3,24 +3,43 @@ class Gtkx < Formula
   homepage "http://gtk.org/"
   url "https://download.gnome.org/sources/gtk+/2.24/gtk+-2.24.28.tar.xz"
   sha256 "b2c6441e98bc5232e5f9bba6965075dcf580a8726398f7374d39f90b88ed4656"
+  revision 3
 
   bottle do
-    sha256 "bbc0dc6e82ebed36acfecbd5216a7e05709ce54353fae2e88ae6dc89d02b4c49" => :yosemite
-    sha256 "e3ac7c303dcf388bf87835a85a1e143c2957eaada72de82527bb0364196a9d35" => :mavericks
-    sha256 "67af28491ac9622e5c19b0d37802c9569e95ab21342b83672de0b6aac98c5c72" => :mountain_lion
+    sha256 "c50b23ea76ad0379e43a44ac2520e2243c5b2f2aded21c7e82c36c20e6a90e1a" => :el_capitan
+    sha256 "72a95671b8b9ba6aaf3e8900f4af6bd9b0b0fcdd6621a200838d3e2622bc7a26" => :yosemite
+    sha256 "0754d744caed63c14ce80b5c3895679d1b93dad9832ca6105488eefa809bb7c1" => :mavericks
   end
+
+  option "with-quartz-relocation", "Build with quartz relocation support"
 
   depends_on "pkg-config" => :build
   depends_on "gdk-pixbuf"
   depends_on "jasper" => :optional
   depends_on "atk"
   depends_on "pango"
-  depends_on :x11 => ["2.3.6", :recommended]
   depends_on "gobject-introspection"
+  depends_on "hicolor-icon-theme"
 
   fails_with :llvm do
     build 2326
     cause "Undefined symbols when linking"
+  end
+
+  # Patch to allow Freeciv's gtk2 client to run.
+  # See:
+  # - https://bugzilla.gnome.org/show_bug.cgi?id=557780
+  # - Homebrew/homebrew-games#278
+  patch do
+    url "https://bug557780.bugzilla-attachments.gnome.org/attachment.cgi?id=306776"
+    sha256 "4d7a1fe8d55174dc7f0be0016814668098d38bbec233b05a6c46180e96a159fc"
+  end
+
+  # Fix crash on OS X 10.11
+  # See: https://bugzilla.gnome.org/show_bug.cgi?id=753992
+  patch do
+    url "https://bug753992.bugzilla-attachments.gnome.org/attachment.cgi?id=312565"
+    sha256 "e2e8d5c236d4de7d5b5fd79a2e90861b281746132a3f96aca6ab0cb780926876"
   end
 
   def install
@@ -29,10 +48,10 @@ class Gtkx < Formula
             "--prefix=#{prefix}",
             "--disable-glibtest",
             "--enable-introspection=yes",
+            "--with-gdktarget=#{OS.mac? ? 'quartz' : 'x11'}",
             "--disable-visibility"]
 
-    args << "--with-gdktarget=quartz" if build.without?("x11")
-    args << "--enable-quartz-relocation" if build.without?("x11")
+    args << "--enable-quartz-relocation" if build.with?("quartz-relocation")
 
     system "./configure", *args
     system "make", "install"
@@ -54,10 +73,10 @@ class Gtkx < Formula
     gdk_pixbuf = Formula["gdk-pixbuf"]
     gettext = Formula["gettext"]
     glib = Formula["glib"]
-    harfbuzz = Formula["harfbuzz"]
     libpng = Formula["libpng"]
     pango = Formula["pango"]
     pixman = Formula["pixman"]
+    backend = OS.mac? ? "quartz" : "x11"
     flags = (ENV.cflags || "").split + (ENV.cppflags || "").split + (ENV.ldflags || "").split
     flags += %W[
       -I#{atk.opt_include}/atk-1.0
@@ -68,7 +87,6 @@ class Gtkx < Formula
       -I#{gettext.opt_include}
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
-      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}/gtk-2.0
       -I#{libpng.opt_include}/libpng16
       -I#{lib}/gtk-2.0/include
@@ -77,8 +95,6 @@ class Gtkx < Formula
       -D_REENTRANT
       -L#{atk.opt_lib}
       -L#{cairo.opt_lib}
-      -L#{fontconfig.opt_lib}
-      -L#{freetype.opt_lib}
       -L#{gdk_pixbuf.opt_lib}
       -L#{gettext.opt_lib}
       -L#{glib.opt_lib}
@@ -86,18 +102,15 @@ class Gtkx < Formula
       -L#{pango.opt_lib}
       -latk-1.0
       -lcairo
-      -lfontconfig
-      -lfreetype
-      -lgdk-x11-2.0
+      -lgdk-#{backend}-2.0
       -lgdk_pixbuf-2.0
       -lgio-2.0
       -lglib-2.0
       -lgobject-2.0
-      -lgtk-x11-2.0
+      -lgtk-#{backend}-2.0
       -lintl
       -lpango-1.0
       -lpangocairo-1.0
-      -lpangoft2-1.0
     ]
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"

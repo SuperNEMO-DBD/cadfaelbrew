@@ -1,25 +1,23 @@
 class Librsvg < Formula
   desc "Library to render SVG files using Cairo"
   homepage "https://live.gnome.org/LibRsvg"
-  url "https://download.gnome.org/sources/librsvg/2.40/librsvg-2.40.9.tar.xz"
-  sha256 "13964c5d35357552b47d365c34215eee0a63bf0e6059b689f048648c6bf5f43a"
+  url "https://download.gnome.org/sources/librsvg/2.40/librsvg-2.40.11.tar.xz"
+  sha256 "611ac0f544debd0c9bf1ef5509c990d218e83dd1d8c83297075c4b29796a2e02"
 
   bottle do
-    sha256 "d5c5069f182b750a3060cca13a5c50f1546713115705af0bb9bc831b12b2f096" => :yosemite
-    sha256 "d491bd2d1cd1a543fb00acca95d8fbcc24676bf0a90edb254ff59bc393262cb8" => :mavericks
-    sha256 "2ae07ec80edb461808b53e529f1fbb4983762500f1f25f15cc702139cc59e385" => :mountain_lion
+    sha256 "200bd5b68421c641e7ba60be1ec220338e0b9c8a3e2e4eac4cfad94e3e4b48d0" => :el_capitan
+    sha256 "052f664a49f8271ab8c89d196ffa95f7a937e91d2138097cb51c88b14a7c0cd5" => :yosemite
+    sha256 "78f3899815c41a811ab0e4c9f237916f2340948edf40579b21f374f8c8d842db" => :mavericks
   end
 
   depends_on "pkg-config" => :build
   depends_on "cairo"
   depends_on "gdk-pixbuf"
   depends_on "glib"
-  depends_on "gtk+" => :recommended
   depends_on "gtk+3" => :optional
   depends_on "libcroco"
   depends_on "libgsf" => :optional
   depends_on "pango"
-  depends_on :x11 => :recommended
 
   def install
     args = ["--disable-dependency-tracking",
@@ -32,6 +30,11 @@ class Librsvg < Formula
     args << "--enable-svgz" if build.with? "libgsf"
 
     system "./configure", *args
+
+    # disable updating gdk-pixbuf cache, we will do this manually in post_install
+    # https://github.com/Homebrew/homebrew/issues/40833
+    inreplace "gdk-pixbuf-loader/Makefile", "$(GDK_PIXBUF_QUERYLOADERS) > $(DESTDIR)$(gdk_pixbuf_cache_file) ;", ""
+
     system "make", "install",
       "gdk_pixbuf_binarydir=#{lib}/gdk-pixbuf-2.0/2.10.0/loaders",
       "gdk_pixbuf_moduledir=#{lib}/gdk-pixbuf-2.0/2.10.0/loaders"

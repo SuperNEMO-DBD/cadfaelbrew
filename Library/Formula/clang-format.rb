@@ -1,27 +1,27 @@
 class ClangFormat < Formula
-  desc "C/C++/Obj-C formatting tools: standalone and editor plugins"
+  desc "Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript"
   homepage "http://clang.llvm.org/docs/ClangFormat.html"
-  version "2015-04-21"
-
-  bottle do
-    cellar :any
-    revision 1
-    sha256 "d468eade3434b83409053931e6489d8d5a15c0e0478c6eebdd8afe7525358322" => :yosemite
-    sha256 "0df98e127d8fd41adabb058edac78937d95862fe2eaf35cdbfe8230167c3c090" => :mavericks
-    sha256 "8a2169b7267c18371984640be6899c35bc3bae278ca535e7017af4a79fb58dd8" => :mountain_lion
-  end
+  version "2015-07-31"
 
   stable do
-    url "http://llvm.org/svn/llvm-project/llvm/tags/google/testing/2015-04-21/", :using => :svn
+    url "http://llvm.org/svn/llvm-project/llvm/tags/google/testing/2015-07-31/", :using => :svn
 
     resource "clang" do
-      url "http://llvm.org/svn/llvm-project/cfe/tags/google/testing/2015-04-21/", :using => :svn
+      url "http://llvm.org/svn/llvm-project/cfe/tags/google/testing/2015-07-31/", :using => :svn
     end
 
     resource "libcxx" do
-      url "http://llvm.org/releases/3.6.0/libcxx-3.6.0.src.tar.xz"
-      sha1 "5445194366ae2291092fd2204030cb3d01ad6272"
+      url "http://llvm.org/releases/3.6.2/libcxx-3.6.2.src.tar.xz"
+      sha256 "52f3d452f48209c9df1792158fdbd7f3e98ed9bca8ebb51fcd524f67437c8b81"
     end
+  end
+
+  bottle do
+    cellar :any_skip_relocation
+    revision 1
+    sha256 "1d96606c434cbf92807f5e1b33d4bd5b7eababb680e9a373f2445b37c1214010" => :el_capitan
+    sha256 "5e808795acb2acc436d80066e717431e0a1b01ef3a3d56b10aa897ada6c8d45e" => :yosemite
+    sha256 "ced2d7917db53c229b14d4744a39e02657ffc15dc54bd032b2d3010527f7e214" => :mavericks
   end
 
   head do
@@ -32,8 +32,8 @@ class ClangFormat < Formula
     end
 
     resource "libcxx" do
-      url "http://llvm.org/releases/3.6.0/libcxx-3.6.0.src.tar.xz"
-      sha1 "5445194366ae2291092fd2204030cb3d01ad6272"
+      url "http://llvm.org/releases/3.6.2/libcxx-3.6.2.src.tar.xz"
+      sha256 "52f3d452f48209c9df1792158fdbd7f3e98ed9bca8ebb51fcd524f67437c8b81"
     end
   end
 

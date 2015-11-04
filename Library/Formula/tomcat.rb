@@ -1,24 +1,24 @@
 class Tomcat < Formula
   desc "Implementation of Java Servlet and JavaServer Pages"
   homepage "https://tomcat.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz"
-  mirror "https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz"
-  sha256 "c98b19a1edaaef2859991f304d0ec8f29c5ccacc6d63a0bc8bf7078d63191a38"
+  url "https://www.apache.org/dyn/closer.cgi?path=tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28.tar.gz"
+  mirror "https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28.tar.gz"
+  sha256 "a7a6c092b79fc5a8cffe5916d0e5554254eddcb3c1911ed90696c153b4f13d10"
 
   bottle do
-    cellar :any
-    sha256 "5c43653281e5e7099230ebb76616583935538140b7802ec5d0fdbb719ccdc5e0" => :yosemite
-    sha256 "caa72406f8f0f60d56dd656aa31e6170194df58d97c7f4661c93624771106c6b" => :mavericks
-    sha256 "0fd6ba9c446dc1cf03c7dc1d537f61b879f8f1d194bf998cb1a0353a09e21831" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "d838813261b38243b1a4b6d3ccc1093061ad2b7731f461cbb67cf1ec02e53d0b" => :el_capitan
+    sha256 "6a9b0dc7d2215969fc7c1ca905d872724639dda739bdbd4b2e7a6bc74049c066" => :yosemite
+    sha256 "9e61553c732fb0009f48db1351921d457ea66c1d2d133e2e7ac9a4eacf656954" => :mavericks
   end
 
   option "with-fulldocs", "Install full documentation locally"
 
   resource "fulldocs" do
-    url "https://www.apache.org/dyn/closer.cgi?path=/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23-fulldocs.tar.gz"
-    mirror "https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23-fulldocs.tar.gz"
-    version "8.0.23"
-    sha256 "bd0c85d48ccd6f0b7838e55215a7e553a8b9b58fd1a880560a7414940413f6d3"
+    url "https://www.apache.org/dyn/closer.cgi?path=/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28-fulldocs.tar.gz"
+    mirror "https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28-fulldocs.tar.gz"
+    version "8.0.28"
+    sha256 "be503ea13eac5ca06bd028d1f768c5c935b060ac0a320cd9788408f2f2faa61f"
   end
 
   def install

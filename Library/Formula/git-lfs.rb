@@ -1,14 +1,14 @@
 class GitLfs < Formula
   desc "Git extension for versioning large files"
   homepage "https://github.com/github/git-lfs"
-  url "https://github.com/github/git-lfs/archive/v0.5.1.tar.gz"
-  sha256 "8cefb145e47b2e582fc284d1fde5486f30e9c754f9d85d12db61c7397c797931"
+  url "https://github.com/github/git-lfs/archive/v1.0.0.tar.gz"
+  sha256 "bd9d0d597b36421babf282680d34d66b626facea63f68fc64399ac9fe70d2dd3"
 
   bottle do
-    cellar :any
-    sha256 "796c25fb3b8efede11672dbf8dc87fb2c1ca7727dc96bb5e99e570eabe221ee5" => :yosemite
-    sha256 "f8325f948d1cfd67db4ad64674919d08a0763bfabda9a2743f022ad7d14d69ea" => :mavericks
-    sha256 "08d39395bc9107b37aeac9570f9bf225b624f19ad2b29bb416db44da06e7c975" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "141164e71595da8f8b6138e42b5f6050a0d7968c56c01ffa722a07b54bdfe2cf" => :el_capitan
+    sha256 "117c48f958a15f3aa8ab08bbaa36e850b98ac9e1baa0e00403cc5e73621a831b" => :yosemite
+    sha256 "69e3aee9a07da25e1e67e2b0e6f7b7a10772f9850c5a509d0740fdb36ef9edd4" => :mavericks
   end
 
   depends_on "go" => :build
@@ -19,6 +19,7 @@ class GitLfs < Formula
   end
 
   test do
+    system "git", "init"
     system "git", "lfs", "track", "test"
     assert_match(/^test filter=lfs/, File.read(".gitattributes"))
   end
