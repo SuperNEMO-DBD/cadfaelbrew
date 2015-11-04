@@ -4,6 +4,8 @@ class Ruby < Formula
   url "https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.3.tar.bz2"
   sha256 "c745cb98b29127d7f19f1bf9e0a63c384736f4d303b83c4f4bda3c2ee3c5e41f"
 
+  patch :DATA
+
   bottle do
     sha256 "13b2a0096f65a74b31a6055bf421332930b2c41101ed2c507d5d0c6a5b9b5770" => :el_capitan
     sha256 "45f8ba8eb5cb90ba89e0bf950148be4f50a88d3d1daf496b954d288543025735" => :yosemite
@@ -174,3 +176,20 @@ class Ruby < Formula
     assert_equal 0, $?.exitstatus
   end
 end
+__END__
+diff --git a/lib/rubygems/package.rb b/lib/rubygems/package.rb
+index 417b34b..e8b8b38 100644
+--- a/lib/rubygems/package.rb
++++ b/lib/rubygems/package.rb
+@@ -366,8 +366,9 @@ EOM
+ 
+         FileUtils.mkdir_p mkdir, mkdir_options
+ 
+-        open destination, 'wb', entry.header.mode do |out|
++        open destination, 'wb' do |out|
+           out.write entry.read
++          FileUtils.chmod entry.header.mode, destination
+         end if entry.file?
+ 
+         verbose destination
+
