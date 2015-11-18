@@ -1,6 +1,6 @@
-# Linuxbrew
+# Cadfaelbrew
 
-Linuxbrew is a fork of [Homebrew](http://brew.sh), the Mac OS package manager, for Linux.
+Cadfaelbrew is a fork of [Homebrew](http://brew.sh), the Mac OS package manager, for the SuperNEMO-DBD experiment.
 
 Features, usage and installation instructions are [summarised on the homepage](http://brew.sh/linuxbrew/).
 
@@ -12,7 +12,6 @@ See [Dependencies](#dependencies) and [Installation](#installation) below for mo
 
 Features
 --------
-
 + Can install software to a home directory and so does not require sudo
 + Install software not packaged by the native distribution
 + Install up-to-date versions of software when the native distribution is old
@@ -20,12 +19,15 @@ Features
 
 Dependencies
 ------------
-
-* **Ruby** 1.8.6 or newer
-+ **GCC** 4.2 or newer
-* **Git** 1.7.12.4 or newer
-+ **Linux** 2.6.16 or newer
-+ **64-bit x86** or **32-bit ARM** platform
++ **Mac OS X**
+  + **OS X** 10.9 or newer 
+  + **Xcode** 6 or newer 
++ **Linux**:
+  * **Ruby** 1.8.6 or newer
+  + **GCC** 4.2 or newer
+  * **Git** 1.7.12.4 or newer
+  + **Linux** 2.6.16 or newer
+  + **64-bit x86** or **32-bit ARM** platform
 
 The [dedicated installer](https://github.com/SuperNEMO-DBD/cadfael-installer) will check everything for you
 and report any missing items. The actual packages checked for on Linux systems are listed below
