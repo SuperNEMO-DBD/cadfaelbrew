@@ -4,14 +4,9 @@ Linuxbrew is a fork of [Homebrew](http://brew.sh), the Mac OS package manager, f
 
 Features, usage and installation instructions are [summarised on the homepage](http://brew.sh/linuxbrew/).
 
-Install Linuxbrew (tl;dr)
--------------------------
-
-Paste at a Terminal prompt:
-
-``` sh
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
-```
+Install Cadfaelbrew (tl;dr)
+--------------------------
+See [the dedicated installer guide](https://github.com/SuperNEMO-DBD/cadfael-installer)
 
 See [Dependencies](#dependencies) and [Installation](#installation) below for more details.
 
@@ -32,7 +27,8 @@ Dependencies
 + **Linux** 2.6.16 or newer
 + **64-bit x86** or **32-bit ARM** platform
 
-Paste at a Terminal prompt:
+The [dedicated installer](https://github.com/SuperNEMO-DBD/cadfael-installer) will check everything for you
+and report any missing items. The actual packages checked for on Linux systems are listed below
 
 ### Debian or Ubuntu
 
@@ -48,29 +44,20 @@ sudo yum groupinstall 'Development Tools' && sudo yum install curl git irb m4 ru
 
 ### 32-bit x86 platforms
 
-Linuxbrew does not currently support 32-bit x86 platforms. It would be possible for Linuxbrew to work on 32-bit x86 platforms with some effort. Pull requests would be welcome if someone were to volunteer to maintain the 32-bit x86 support.
+Cadfaelbrew does not currently support 32-bit x86 platforms. 
 
 Installation
 ------------
-
-Paste at a Terminal prompt:
-
-``` sh
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/linuxbrew/go/install)"
-```
-
-Or if you prefer:
-
 ```sh
-git clone https://github.com/Homebrew/linuxbrew.git ~/.linuxbrew
+git clone https://github.com/Homebrew/linuxbrew.git ~/CadfaelBrew
 ```
 
 Add to your `.bashrc` or `.zshrc`:
 
 ```sh
-export PATH="$HOME/.linuxbrew/bin:$PATH"
-export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
-export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
+export PATH="$HOME/CadfaelBrew/bin:$PATH"
+export MANPATH="$HOME/CadfaelBrew/share/man:$MANPATH"
+export INFOPATH="$HOME/CadfaelBrew/share/info:$INFOPATH"
 ```
 
 You're done!
@@ -85,21 +72,21 @@ brew install $WHATEVER_YOU_WANT
 3. Or use `brew search --desc` to browse packages from the command line.
 
 ## More Documentation
-`brew help`, `man brew` or check [our documentation](https://github.com/Homebrew/linuxbrew/tree/master/share/doc/homebrew#readme).
+`brew help`, `man brew` or check [our documentation](https://github.com/SuperNEMO-DBD/cadfaelbrew/tree/master/share/doc/homebrew#readme).
 
 ## Troubleshooting
 First, please run `brew update` and `brew doctor`.
 
-Second, read the [Troubleshooting Checklist](https://github.com/Homebrew/linuxbrew/blob/master/share/doc/homebrew/Troubleshooting.md#troubleshooting).
+Second, read the [Troubleshooting Checklist](https://github.com/SuperNEMO-DBD/cadfaelbrew/blob/master/share/doc/homebrew/Troubleshooting.md#troubleshooting).
 
 **If you don't read these it will take us far longer to help you with your problem.**
 
 ## Something broke!
 
-Many of the Homebrew formulae work on either Mac or Linux without changes, but some formulae will need to be adapted for Linux. If a formula doesn't work, [open an issue on GitHub](https://github.com/Homebrew/linuxbrew/issues) or, even better, submit a pull request.
+Many of the Homebrew formulae work on either Mac or Linux without changes, but some formulae will need to be adapted for Linux. If a formula doesn't work, [open an issue on GitHub](https://github.com/SuperNEMO-DBD/cadfaelbrew/issues) or, even better, submit a pull request.
 
 ## Security
-Please report security issues to security@brew.sh.
+Please report security issues directly to the main homebrew security team: security@brew.sh.
 
 This is our PGP key which is valid until June 17, 2016.
 * Key ID: `0xE33A3D3CCE59E297`
@@ -107,6 +94,8 @@ This is our PGP key which is valid until June 17, 2016.
 * Full key: https://keybase.io/homebrew/key.asc
 
 ## Who Are You?
+Cadfaelbrew is mainteined by [Ben Morgan](https://github.com/drbenmorgan).
+
 Linuxbrew is maintained by [Shaun Jackman](https://github.com/sjackman).
 
 Homebrew's current maintainers are [Misty De Meo](https://github.com/mistydemeo), [Adam Vandenberg](https://github.com/adamv), [Xu Cheng](https://github.com/xu-cheng), [Mike McQuaid](https://github.com/mikemcquaid), [Baptiste Fontaine](https://github.com/bfontaine), [Brett Koonce](https://github.com/asparagui), [Dominyk Tiller](https://github.com/DomT4), [Tim Smith](https://github.com/tdsmith) and [Alex Dunn](https://github.com/dunn).
