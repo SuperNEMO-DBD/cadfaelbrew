@@ -113,6 +113,10 @@ class Python < Formula
     args << "--without-gcc" if ENV.compiler == :clang
     args << "--enable-unicode=ucs4" if build.with? "unicode-ucs4"
 
+    cflags   = []
+    ldflags  = []
+    cppflags = []
+
     if OS.mac? && !MacOS::CLT.installed?
       # Help Python's build system (setuptools/pip) to build things on Xcode-only systems
       # The setup.py looks at "-isysroot" to get the sysroot (and not at --sysroot)
@@ -134,9 +138,8 @@ class Python < Formula
       hints << "tcl-tk" if build.with? "tcl-tk"
       hint_includes = hints.map { |f| "-I#{Formula[f].opt_include}" }
       hint_libs = hints.map { |f| "-L#{Formula[f].opt_lib}" }
-      cppflags = "CPPFLAGS=#{hint_includes.join " "}"
-      ldflags = "LDFLAGS=#{hint_libs.join " "}"
-      args << cppflags << ldflags
+      cppflags << "#{hint_includes.join " "}"
+      ldflags  << "#{hint_libs.join " "}"
     end
 
     # Avoid linking to libgcc https://code.activestate.com/lists/python-dev/112195/
