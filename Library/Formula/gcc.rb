@@ -21,15 +21,18 @@ class Gcc < Formula
 
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org"
-  url "http://ftpmirror.gnu.org/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
-  mirror "https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2"
-  sha256 "5f835b04b5f7dd4f4d2dc96190ec1621b8d89f2dc6f638f9f8bc1b1014ba8cad"
+  url "http://ftpmirror.gnu.org/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2"
+  sha256 "b84f5592e9218b73dbae612b5253035a7b34a9a1f7688d2e1bfaaf7267d5c4db"
+
+  head "svn://gcc.gnu.org/svn/gcc/trunk"
 
   bottle do
-    revision 3
-    sha256 "c52a4d2edf5261e25803e2ee67f5e477b9ec0d079c11348822efb34c369ddfce" => :el_capitan
-    sha256 "4596a645c71a10107fd786fec5400089dbc2ffe0aad568f548b3300ae3e9d758" => :yosemite
-    sha256 "29a8d7046b27a492bd41481a422810d9d8a4b037e1147559200b91fc0bbdb086" => :mavericks
+    cellar :any if OS.linux?
+    sha256 "90ad519442f0336b0beee3cf2be305ea495fb2e2ad82c2a96c5b0c3bcef8f268" => :el_capitan
+    sha256 "334bd7afbec85740ec7c49eedf52858209c31ed1f284ad10ccab7c50a41bcd35" => :yosemite
+    sha256 "679c9bfc2082f8ab4320c89082b08c4eab9523dd72bfed27fe4b712de7013a1f" => :mavericks
+    sha256 "2c6ae8e098830e19f87d8426b49d353b6cbc0b89d9259bae242d57b6694c9039" => :x86_64_linux
   end
 
   option "with-java", "Build the gcj compiler"
@@ -46,7 +49,8 @@ class Gcc < Formula
 
   depends_on "zlib" unless OS.mac?
   depends_on "binutils" if build.with? "glibc"
-  depends_on "glibc" => :optional
+  depends_on "glibc" => Formula["glibc"].installed? || !GlibcRequirement.new.satisfied? ?
+    :recommended : :optional
   depends_on "gmp"
   depends_on "libmpc"
   depends_on "mpfr"
@@ -67,8 +71,9 @@ class Gcc < Formula
 
   # The bottles are built on systems with the CLT installed, and do not work
   # out of the box on Xcode-only systems due to an incorrect sysroot.
-  def pour_bottle?
-    MacOS::CLT.installed?
+  pour_bottle? do
+    reason "The bottle needs the Xcode CLT to be installed."
+    satisfy { MacOS::CLT.installed? }
   end
 
   def version_suffix
@@ -104,12 +109,18 @@ class Gcc < Formula
     args = []
     args << "--build=#{arch}-apple-darwin#{osmajor}" if OS.mac?
     if build.with? "glibc"
+      # Fix for GCC 4.4 and older that do not support -static-libstdc++
+      # gengenrtl: error while loading shared libraries: libstdc++.so.6
+      mkdir_p lib
+      ln_s ["/usr/lib64/libstdc++.so.6", "/lib64/libgcc_s.so.1"], lib
       binutils = Formula["binutils"].prefix/"x86_64-unknown-linux-gnu/bin"
       args += [
         "--with-native-system-header-dir=#{HOMEBREW_PREFIX}/include",
+        "--with-local-prefix=#{HOMEBREW_PREFIX}/local",
         "--with-build-time-tools=#{binutils}",
-        "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV["LDFLAGS"]}",
       ]
+      # Set the search path for glibc libraries and objects.
+      ENV["LIBRARY_PATH"] = Formula["glibc"].lib
     end
     args += [
       "--prefix=#{prefix}",
@@ -121,8 +132,6 @@ class Gcc < Formula
       "--with-mpfr=#{Formula["mpfr"].opt_prefix}",
       "--with-mpc=#{Formula["libmpc"].opt_prefix}",
       "--with-isl=#{Formula["isl"].opt_prefix}",
-    ]
-    args += [
       "--with-system-zlib",
       "--enable-libstdcxx-time=yes",
       "--enable-stage1-checking",
@@ -133,8 +142,11 @@ class Gcc < Formula
       "--with-build-config=bootstrap-debug",
       "--disable-werror",
       "--with-pkgversion=Homebrew #{name} #{pkg_version} #{build.used_options*" "}".strip,
-      "--with-bugurl=https://github.com/Homebrew/homebrew/issues"
+      "--with-bugurl=https://github.com/Homebrew/homebrew/issues",
     ]
+
+    # Fix cc1: error while loading shared libraries: libisl.so.15
+    args << "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV["LDFLAGS"]}" if OS.linux?
 
     # "Building GCC with plugin support requires a host that supports
     # -fPIC, -shared, -ldl and -rdynamic."
@@ -143,7 +155,7 @@ class Gcc < Formula
     # The pre-Mavericks toolchain requires the older DWARF-2 debugging data
     # format to avoid failure during the stage 3 comparison of object files.
     # See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=45248
-    args << "--with-dwarf2" if MacOS.version <= :mountain_lion
+    args << "--with-dwarf2" if OS.mac? && MacOS.version <= :mountain_lion
 
     args << "--disable-nls" if build.without? "nls"
 
@@ -202,7 +214,7 @@ class Gcc < Formula
         "#{lib}/gcc/#{version_suffix}/logging.properties",
         "#{lib}/gcc/#{version_suffix}/security/classpath.security",
         "#{lib}/gcc/#{version_suffix}/i386/logging.properties",
-        "#{lib}/gcc/#{version_suffix}/i386/security/classpath.security"
+        "#{lib}/gcc/#{version_suffix}/i386/security/classpath.security",
       ]
       config_files.each do |file|
         add_suffix file, version_suffix if File.exist? file
@@ -212,7 +224,7 @@ class Gcc < Formula
     # Move lib64/* to lib/ on Linuxbrew
     lib64 = Pathname.new "#{lib}64"
     if lib64.directory?
-      system "mv #{lib64}/* #{lib}/"
+      system "mv #{lib64}/* #{lib}/" # Do not use FileUtils.mv with Ruby 1.9.3
       rmdir lib64
       prefix.install_symlink "lib" => "lib64"
     end
@@ -244,25 +256,24 @@ class Gcc < Formula
       rm_f [specs_orig, specs]
 
       # Save a backup of the default specs file
-      s = `#{bin}/#{gcc} -dumpspecs`
+      specs_string = `#{bin}/#{gcc} -dumpspecs`
       raise "command failed: #{gcc} -dumpspecs" if $?.exitstatus != 0
-      specs_orig.write s
+      specs_orig.write specs_string
 
       # Set the library search path
-      if build.with?("glibc")
-        s += "*link_libgcc:\n-nostdlib -L#{lib}/gcc/x86_64-unknown-linux-gnu/#{version} -L#{HOMEBREW_PREFIX}/lib\n\n"
-      else
-        s += "*link_libgcc:\n+ -L#{HOMEBREW_PREFIX}/lib\n\n"
-      end
-      s += "*link:\n+ -rpath #{HOMEBREW_PREFIX}/lib"
-
-      # Set the dynamic linker
       glibc = Formula["glibc"]
-      if glibc.installed?
-        s += " --dynamic-linker #{glibc.opt_lib}/ld-linux-x86-64.so.2"
-      end
-      s += "\n\n"
-      specs.write s
+      libgcc = lib/"gcc/x86_64-unknown-linux-gnu"/version
+      specs.write specs_string + <<-EOS.undent
+        *cpp_unique_options:
+        + -isystem #{HOMEBREW_PREFIX}/include
+
+        *link_libgcc:
+        #{glibc.installed? ? "-nostdlib -L#{libgcc}" : "+"} -L#{HOMEBREW_PREFIX}/lib
+
+        *link:
+        + --dynamic-linker #{HOMEBREW_PREFIX}/lib/ld.so -rpath #{HOMEBREW_PREFIX}/lib
+
+      EOS
     end
   end
 

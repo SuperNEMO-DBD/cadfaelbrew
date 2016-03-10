@@ -1,13 +1,13 @@
 class Nghttp2 < Formula
   desc "HTTP/2 C Library"
   homepage "https://nghttp2.org/"
-  url "https://github.com/tatsuhiro-t/nghttp2/releases/download/v1.3.4/nghttp2-1.3.4.tar.xz"
-  sha256 "87803308317247f90cab37cdba2eb45cf03a7f083fac5ed4e40f0937a9c37867"
+  url "https://github.com/tatsuhiro-t/nghttp2/releases/download/v1.8.0/nghttp2-1.8.0.tar.xz"
+  sha256 "61a545299171893a918d5b3c3cedc6540e73bdaa25dd1fb588eb291819743aec"
 
   bottle do
-    sha256 "89ffd2019e3647da6b879d4cbc70a2d29907093cf3e284449ca50b5afb8b2663" => :el_capitan
-    sha256 "277488c1b05ef646ec62a66feca98bdbfc68e9236b5398777d3aa2aa658cbd7b" => :yosemite
-    sha256 "6f9bbc3e7a7a1b867d71803ec8b3d10ec9a2ababe90dd689bf790dea2f6cef31" => :mavericks
+    sha256 "b13e8f372a97b02fec5e1bcce91ac564640259080039bd1b0e31d035c9fcbd32" => :el_capitan
+    sha256 "93f971ccf3f71a6a7b204910a8571c1f1dda84139141550071a6216a0ea038bd" => :yosemite
+    sha256 "09240d5d0f69a98f8c0ced1e0b17714b1d880f4a65fbb87a8eecce46952f6097" => :mavericks
   end
 
   head do

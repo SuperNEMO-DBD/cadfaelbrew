@@ -1,8 +1,8 @@
 require "blacklist"
-require "cmd/doctor"
+require "diagnostic"
 require "cmd/search"
-require "cmd/tap"
 require "formula_installer"
+require "tap"
 require "hardware"
 
 module Homebrew
@@ -14,9 +14,10 @@ module Homebrew
     end
 
     ARGV.named.each do |name|
-      if !File.exist?(name) && (name !~ HOMEBREW_CORE_FORMULA_REGEX) \
-              && (name =~ HOMEBREW_TAP_FORMULA_REGEX || name =~ HOMEBREW_CASK_TAP_FORMULA_REGEX)
-        install_tap $1, $2
+      if !File.exist?(name) &&
+         (name =~ HOMEBREW_TAP_FORMULA_REGEX || name =~ HOMEBREW_CASK_TAP_FORMULA_REGEX)
+        tap = Tap.fetch($1, $2)
+        tap.install unless tap.installed?
       end
     end unless ARGV.force?
 
@@ -24,8 +25,6 @@ module Homebrew
       formulae = []
 
       if OS.mac? && ARGV.casks.any?
-        brew_cask = Formulary.factory("brew-cask")
-        install_formula(brew_cask) unless brew_cask.installed?
         args = []
         args << "--force" if ARGV.force?
         args << "--debug" if ARGV.debug?
@@ -98,10 +97,36 @@ module Homebrew
       else
         ofail e.message
         query = query_regexp(e.name)
-        ohai "Searching formulae..."
-        puts_columns(search_formulae(query))
+
+        ohai "Searching for similarly named formulae..."
+        formulae_search_results = search_formulae(query)
+        case formulae_search_results.length
+        when 0
+          ofail "No similarly named formulae found."
+        when 1
+          puts "This similarly named formula was found:"
+          puts_columns(formulae_search_results)
+          puts "To install it, run:\n  brew install #{formulae_search_results.first}"
+        else
+          puts "These similarly named formulae were found:"
+          puts_columns(formulae_search_results)
+          puts "To install one of them, run (for example):\n  brew install #{formulae_search_results.first}"
+        end
+
         ohai "Searching taps..."
-        puts_columns(search_taps(query))
+        taps_search_results = search_taps(query)
+        case taps_search_results.length
+        when 0
+          ofail "No formulae found in taps."
+        when 1
+          puts "This formula was found in a tap:"
+          puts_columns(taps_search_results)
+          puts "To install it, run:\n  brew install #{taps_search_results.first}"
+        else
+          puts "These formulae were found in taps:"
+          puts_columns(taps_search_results)
+          puts "To install one of them, run (for example):\n  brew install #{taps_search_results.first}"
+        end
 
         # If they haven't updated in 48 hours (172800 seconds), that
         # might explain the error
@@ -133,7 +158,7 @@ module Homebrew
   end
 
   def check_xcode
-    checks = Checks.new
+    checks = Diagnostic::Checks.new
     %w[
       check_for_unsupported_osx
       check_for_bad_install_name_tool
@@ -163,11 +188,25 @@ module Homebrew
     EOS
   end
 
+  # Create a symlink for the dynamic linker/loader ld.so
+  def check_ld_so_symlink
+    return unless OS.linux?
+    ld_so = HOMEBREW_PREFIX/"lib/ld.so"
+    return if ld_so.readable?
+    glibc = Formula["glibc"]
+    interpreter = glibc && glibc.installed? ? glibc.lib/"ld-linux-x86-64.so.2" : "/lib64/ld-linux-x86-64.so.2"
+    mkdir_p HOMEBREW_PREFIX/"lib"
+    FileUtils.ln_sf interpreter, ld_so
+  rescue FormulaUnavailableError
+    # Fix for brew tests, which uses NullLoader.
+  end
+
   def perform_preinstall_checks
     check_ppc
     check_writable_install_location
     check_xcode if MacOS.has_apple_developer_tools?
     check_cellar
+    check_ld_so_symlink
   end
 
   def install_formula(f)

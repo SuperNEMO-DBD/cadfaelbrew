@@ -1,32 +1,36 @@
 class Git < Formula
   desc "Distributed revision control system"
   homepage "https://git-scm.com"
-  url "https://www.kernel.org/pub/software/scm/git/git-2.6.1.tar.xz"
-  sha256 "fc7c727745d5eb0d796a16dc7c4b999c184830110e0aeb592c788597cc8e9ccd"
+  url "https://www.kernel.org/pub/software/scm/git/git-2.7.2.tar.xz"
+  sha256 "b20479ce523031c37581b763b4442b25b9d606f2f416049aea4e463dc150cf20"
 
   head "https://github.com/git/git.git", :shallow => false
 
   bottle do
-    revision 1
-    sha256 "0e37b76e7c74f3b4680b5df6afd8de598701da936a5f24d13707bf21f508cc96" => :el_capitan
-    sha256 "17f37e56578a3f978973012073b0b9a89ed5bf74d907213c0072eba560051c3c" => :yosemite
-    sha256 "3223fa320eb16cfcb10691c5a5a7b728c6886ba46557143e8a78b91f843b8ae4" => :mavericks
+    sha256 "f362079b20280993bed4307c08ff6e0fe78e700bb9729b85d5f377321765c886" => :el_capitan
+    sha256 "1ed29e91e9a4d50c301740009642eb44bc526f5f0b88865f7ebd407f8f4e80ce" => :yosemite
+    sha256 "127a57f92c71b42e74a104905d81af10ca02c1f59dc70dd71e88b9ca2eae4d18" => :mavericks
   end
 
   resource "man" do
-    url "https://www.kernel.org/pub/software/scm/git/git-manpages-2.6.1.tar.xz"
-    sha256 "e4cf64edcecd284d9ef4e6ca7fa0e8556d2414b5d9881a9abfe477f95b416391"
+    url "https://www.kernel.org/pub/software/scm/git/git-manpages-2.7.2.tar.xz"
+    sha256 "19a6254a34da516e1ec67bfcbc6da7a1483440a2e8416b30e736f96c3404ff4b"
   end
 
   resource "html" do
-    url "https://www.kernel.org/pub/software/scm/git/git-htmldocs-2.6.1.tar.xz"
-    sha256 "791487ebd5a25456d41d8825ef450fdf3214898a328028d01acdb21a668052da"
+    url "https://www.kernel.org/pub/software/scm/git/git-htmldocs-2.7.2.tar.xz"
+    sha256 "fabf3afa674931c70d6bb2e37497b46046f554c8d5520f0ccb126ce5e748f724"
   end
 
   option "with-blk-sha1", "Compile with the block-optimized SHA1 implementation"
   option "without-completions", "Disable bash/zsh completions from 'contrib' directory"
-  option "with-brewed-openssl", "Build with Homebrew OpenSSL instead of the system version"
-  option "with-brewed-curl", "Use Homebrew's version of cURL library"
+  if OS.mac?
+    option "with-brewed-openssl", "Build with Homebrew OpenSSL instead of the system version"
+    option "with-brewed-curl", "Use Homebrew's version of cURL library"
+  else
+    option "without-brewed-openssl", "Build with the system's OpenSSL library instead of Homebrew's"
+    option "without-brewed-curl", "Build with the system's cURL library instead of Homebrew's"
+  end
   option "with-brewed-svn", "Use Homebrew's version of SVN"
   option "with-persistent-https", "Build git-remote-persistent-https from 'contrib' directory"
 
@@ -36,7 +40,7 @@ class Git < Formula
   depends_on "curl" if build.with? "brewed-curl"
   depends_on "go" => :build if build.with? "persistent-https"
   depends_on "expat" unless OS.mac?
-  depends_on "homebrew/dupes/tcl-tk" => :recommended unless OS.mac?
+  depends_on "homebrew/dupes/tcl-tk" => :optional unless OS.mac?
 
   # Trigger an install of swig before subversion, as the "swig" doesn't get pulled in otherwise
   # See https://github.com/Homebrew/homebrew/issues/34554
@@ -131,6 +135,7 @@ class Git < Formula
       cp "#{bash_completion}/git-completion.bash", zsh_completion
     end
 
+    elisp.install Dir["contrib/emacs/*.el"]
     (share+"git-core").install "contrib"
 
     # We could build the manpages ourselves, but the build process depends

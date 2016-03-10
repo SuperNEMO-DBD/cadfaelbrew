@@ -1,21 +1,20 @@
 class Mesos < Formula
   desc "Apache cluster manager"
   homepage "https://mesos.apache.org"
-  url "https://www.apache.org/dyn/closer.cgi?path=mesos/0.25.0/mesos-0.25.0.tar.gz"
-  mirror "https://archive.apache.org/dist/mesos/0.25.0/mesos-0.25.0.tar.gz"
-  sha256 "81ee9e722b66f52d8f3270a76eecea60fdcab48d6f7dba51ecce592293124b75"
-  revision 1
+  url "https://www.apache.org/dyn/closer.cgi?path=mesos/0.27.1/mesos-0.27.1.tar.gz"
+  mirror "https://archive.apache.org/dist/mesos/0.27.1/mesos-0.27.1.tar.gz"
+  sha256 "889ecf6c1eb2e41fe06561e2534404e5a597273519c1d0e9c23381c8f7c1f190"
 
   bottle do
-    sha256 "9cc964e98ca0e3f2a1a0a9dcc34019aa8beb14e68b626fdab9940e8b73c0dc2d" => :el_capitan
-    sha256 "9db0716715872af1372e178a782dba74fb593719589aec71b16e11d5fec43490" => :yosemite
-    sha256 "7837ef77b17f87ba10bccf659c35fd161271e308af33fadd36ef103806a73a30" => :mavericks
+    sha256 "b79ec00ee495423091cb62c144d7f0afecc96cbcf750757c6431ef87c075c495" => :el_capitan
+    sha256 "b8d50cd3bfbe9ce509afc75f694104efda1c494f0627735cf50ef3bfe38f5170" => :yosemite
+    sha256 "0c3908c9c474796da6aa4d186ae720d7ae6088d1319a8954aff92efef1328dcb" => :mavericks
   end
 
   depends_on :java => "1.7+"
   depends_on :macos => :mountain_lion
-  depends_on "maven" => :build
   depends_on :apr => :build
+  depends_on "maven" => :build
   depends_on "subversion"
 
   resource "boto" do
@@ -57,8 +56,7 @@ class Mesos < Formula
   needs :cxx11
 
   def install
-    # Set _JAVA_OPTIONS to make mesos java plugins compile success in Homebrew sandbox.
-    ENV["_JAVA_OPTIONS"] = "-Duser.home=#{buildpath}/.brew_home"
+    ENV.java_cache
 
     boto_path = libexec/"boto/lib/python2.7/site-packages"
     ENV.prepend_create_path "PYTHONPATH", boto_path
@@ -81,8 +79,8 @@ class Mesos < Formula
               "import ext_modules",
               native_patch
 
-    # skip build javadoc because Homebrew sandbox set _JAVA_OPTIONS would
-    # trigger maven-javadoc-plugin bug.
+    # skip build javadoc because Homebrew sandbox ENV.java_cache
+    # would trigger maven-javadoc-plugin bug.
     # https://issues.apache.org/jira/browse/MESOS-3482
     maven_javadoc_patch = <<-EOS.undent
       <properties>
@@ -94,12 +92,13 @@ class Mesos < Formula
               "<url>http://mesos.apache.org</url>",
               maven_javadoc_patch
 
-    args = ["--prefix=#{prefix}",
-            "--disable-debug",
-            "--disable-dependency-tracking",
-            "--disable-silent-rules",
-            "--with-svn=#{Formula["subversion"].opt_prefix}"
-           ]
+    args = %W[
+      --prefix=#{prefix}
+      --disable-debug
+      --disable-dependency-tracking
+      --disable-silent-rules
+      --with-svn=#{Formula["subversion"].opt_prefix}
+    ]
 
     unless MacOS::CLT.installed?
       args << "--with-apr=#{Formula["apr"].opt_prefix}/libexec"

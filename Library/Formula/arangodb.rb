@@ -1,10 +1,16 @@
 class Arangodb < Formula
   desc "Universal open-source database with a flexible data model"
   homepage "https://www.arangodb.com/"
-  url "https://www.arangodb.com/repositories/Source/ArangoDB-2.7.1.tar.gz"
-  sha256 "a0f5cb20bdfa9750f43ee57a559a370a22bfc3f184a9d6d2d30d0bdadf639e12"
+  url "https://www.arangodb.com/repositories/Source/ArangoDB-2.8.4.tar.gz"
+  sha256 "25f27c9b1200971f9134531ecee8411501a63b7274035d9d555c6f3741f8de53"
 
   head "https://github.com/arangodb/arangodb.git", :branch => "unstable"
+
+  bottle do
+    sha256 "11062e71fb3daf39a008a318e084556bee10408ec3b81c09912cbc1236ef7c8f" => :el_capitan
+    sha256 "20462f622391efbf9a19b14ab8bdfb5ec92af3a4233d141f43e8d90d9af61cba" => :yosemite
+    sha256 "965f78b0f29f400bb4b5779bfbea59ecb45cebd95d612ad76dd1519cbdfad50d" => :mavericks
+  end
 
   depends_on "go" => :build
   depends_on "openssl"
@@ -26,22 +32,32 @@ class Arangodb < Formula
       --disable-dependency-tracking
       --prefix=#{prefix}
       --disable-relative
-      --enable-mruby
       --datadir=#{share}
       --localstatedir=#{var}
     ]
 
     args << "--program-suffix=-unstable" if build.head?
 
+    if ENV.compiler != :clang
+      ENV.append "LDFLAGS", "-static-libgcc -static-libstdc++"
+    end
+
     system "./configure", *args
     system "make", "install"
-
-    (var/"arangodb").mkpath
-    (var/"log/arangodb").mkpath
   end
 
   def post_install
+    (var/"arangodb").mkpath
+    (var/"log/arangodb").mkpath
+
     system "#{sbin}/arangod" + (build.head? ? "-unstable" : ""), "--upgrade", "--log.file", "-"
+  end
+
+  def caveats; <<-EOS.undent
+    Please note that clang and/or its standard library 7.0.0 has a severe
+    performance issue. Please consider using '--cc=gcc-5' when installing
+    if you are running on such a system.
+    EOS
   end
 
   plist_options :manual => "#{HOMEBREW_PREFIX}/opt/arangodb/sbin/arangod" + (build.head? ? "-unstable" : "") + " --log.file -"

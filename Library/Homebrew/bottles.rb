@@ -1,5 +1,4 @@
 require "tab"
-require "os/mac"
 require "extend/ARGV"
 
 def built_as_bottle?(f)
@@ -23,8 +22,8 @@ def bottle_native_regex
 end
 
 def bottle_tag
-  if OS.linux?
-    :"#{RUBY_PLATFORM.tr("-.", "_")}"
+  if MacOS.version == :linux
+    :"#{RUBY_PLATFORM.sub("-gnu", "").tr("-.", "_")}"
   elsif MacOS.version >= :lion
     MacOS.cat
   elsif MacOS.version == :snow_leopard
@@ -52,10 +51,10 @@ def bottle_resolve_formula_names(bottle_file)
   name = receipt_file_path.split("/").first
   tap = Tab.from_file_content(receipt_file, "#{bottle_file}/#{receipt_file_path}").tap
 
-  if tap.nil? || tap == "SuperNEMO-DBD/cadfaelbrew" || tap == "Homebrew/homebrew" || tap == "mxcl/master"
+  if tap.nil? || tap == "SuperNEMO-DBD/cadfaelbrew" || tap.core_tap?
     full_name = name
   else
-    full_name = "#{tap.sub("homebrew-", "")}/#{name}"
+    full_name = "#{tap}/#{name}"
   end
 
   [name, full_name]
@@ -71,8 +70,11 @@ class Bintray
   end
 
   def self.repository(tap = nil)
-    return "bottles" if tap.nil? || tap == "Homebrew/homebrew"
-    "bottles-#{tap.sub(%r{^homebrew/(homebrew-)?}i, "")}"
+    if tap.nil? || tap.core_tap?
+      "bottles"
+    else
+      "bottles-#{tap.repo}"
+    end
   end
 end
 

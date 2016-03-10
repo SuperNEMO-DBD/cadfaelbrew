@@ -2,14 +2,22 @@ class Dcd < Formula
   desc "Auto-complete program for the D programming language"
   homepage "https://github.com/Hackerpilot/DCD"
   url "https://github.com/Hackerpilot/DCD.git",
-      :tag => "v0.7.0",
-      :revision => "5310b346304e060c7633521fe3fd5afc2a16de88"
+      :tag => "v0.8.0",
+      :revision => "f8f3024dda05e7f3d1a112adde1f99ec98649e78"
+
   head "https://github.com/Hackerpilot/dcd.git", :shallow => false
 
   bottle do
-    sha256 "4c374caea3609ac4852a5aac8ee12c0949d1c7cd856740c2d1f639befa386259" => :yosemite
-    sha256 "b30a4329fb2c3cb80c18f0ff1c4691037832cd995cc7f8a371f97019f9d9dce5" => :mavericks
-    sha256 "9367b7f6fced915d49a20e9ec30ba399a3ad827096aea7ade765e0028eae6c51" => :mountain_lion
+    sha256 "aa5bf3b36f947743dcdf6d3cad4e2973ad2d08746a9eb668a5477b8458090110" => :el_capitan
+    sha256 "fe742c126f957f99b1691b2044352f0b134bf0af8a1812c46b256a370f3396e7" => :yosemite
+    sha256 "03cd0ece3ba032610457891fb74d1be87417a87e960377e38fc580df7ae8f2c1" => :mavericks
+  end
+
+  devel do
+    url "https://github.com/Hackerpilot/DCD.git",
+      :tag => "v0.9.0-alpha1",
+      :revision => "7028dc1fcfb7d409b413c243dd3403bb7a6fdc91"
+    version "0.9.0-alpha1"
   end
 
   depends_on "dmd" => :build

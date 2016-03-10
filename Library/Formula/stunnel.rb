@@ -1,14 +1,14 @@
 class Stunnel < Formula
   desc "SSL tunneling program"
   homepage "https://www.stunnel.org/"
-  url "https://www.stunnel.org/downloads/stunnel-5.24.tar.gz"
-  mirror "https://www.usenix.org.uk/mirrors/stunnel/stunnel-5.24.tar.gz"
-  sha256 "ab2e5a1034d422951ddad21b572eb7fa8efb4c4ce04bc86536c6845f3d02b07e"
+  url "https://www.stunnel.org/downloads/stunnel-5.31.tar.gz"
+  mirror "https://www.usenix.org.uk/mirrors/stunnel/stunnel-5.31.tar.gz"
+  sha256 "a746b71ab3dc6c23eacb0daf7342467870e43ac933430905eb1b1d050bbae0b7"
 
   bottle do
-    sha256 "807fabb664c4f2bc6b4331c9a794428dc20fa88bc799343c0ac085b240bfd822" => :el_capitan
-    sha256 "0f4eae640b7636a3b11b5fed82a8307e894e51b77754c04224e293021c260c71" => :yosemite
-    sha256 "e4df15eac26bade5b5d583f480a547648405366a60c9d342a1b1788e419d65a2" => :mavericks
+    sha256 "5f036314f9861dc215ba34c63cadd58b5382e313216079896187ac7753c16df3" => :el_capitan
+    sha256 "b297baddc262876527f8f3b112b999da7d08661aea9809be8c9824a09c75b223" => :yosemite
+    sha256 "dc1479352ca2dd0842e7e24815cf4fc60eec961155401512407071f303a6efc4" => :mavericks
   end
 
   # Please revision me whenever OpenSSL is updated
@@ -69,6 +69,6 @@ class Stunnel < Formula
       connect = 143
     EOS
 
-    assert_match /successful/, pipe_output("#{bin}/stunnel #{testpath}/tstunnel.conf 2>&1")
+    assert_match "successful", pipe_output("#{bin}/stunnel #{testpath}/tstunnel.conf 2>&1")
   end
 end

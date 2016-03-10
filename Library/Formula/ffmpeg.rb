@@ -1,19 +1,18 @@
 class Ffmpeg < Formula
   desc "Play, record, convert, and stream audio and video"
   homepage "https://ffmpeg.org/"
-  url "https://ffmpeg.org/releases/ffmpeg-2.8.2.tar.bz2"
-  sha256 "830ec647f7ad774fc0caf17ba47774bf5dee7a89cbd65894f364a87ba3ad21b2"
+  url "https://ffmpeg.org/releases/ffmpeg-3.0.tar.bz2"
+  sha256 "f19ff77a2f7f736a41dd1499eef4784bf3cb7461f07c13a268164823590113c0"
   head "https://github.com/FFmpeg/FFmpeg.git"
 
   bottle do
-    sha256 "f64fc57eddec2f0ba39f82111641d64d5c5e2cb2f0d632763e2a128da3944c2c" => :el_capitan
-    sha256 "7e2dfbf74763b7c62ce2189857290ec69f0d773d51493b41eb768299646c3ebe" => :yosemite
-    sha256 "839d6593f140577eab402c7f93be9fc739de6996d2e90692c26d575c16e01803" => :mavericks
+    sha256 "edaa154c01bb19193486c0b7e4028f23022580c7fd9bea086574b682521fb4b2" => :el_capitan
+    sha256 "5c0dd21caf975cbcbd0e6e854ac09d89d2f11d9eec42d4a7698374c8e5d70b82" => :yosemite
+    sha256 "cda255f85915e7ec2a1c750f9ca9501b344320219e86da07f76bcd45fa8bf16c" => :mavericks
   end
 
   option "without-x264", "Disable H.264 encoder"
   option "without-lame", "Disable MP3 encoder"
-  option "without-libvo-aacenc", "Disable VisualOn AAC encoder"
   option "without-xvid", "Disable Xvid MPEG-4 video encoder"
   option "without-qtkit", "Disable deprecated QuickTime framework"
 
@@ -33,6 +32,10 @@ class Ffmpeg < Formula
   option "with-webp", "Enable using libwebp to encode WEBP images"
   option "with-zeromq", "Enable using libzeromq to receive commands sent through a libzeromq client"
   option "with-snappy", "Enable Snappy library"
+  option "with-dcadec", "Enable dcadec library"
+  option "with-rubberband", "Enable rubberband library"
+  option "with-zimg", "Enable z.lib zimg library"
+  option "with-openh264", "Enable OpenH264 library"
 
   depends_on "pkg-config" => :build
 
@@ -42,7 +45,6 @@ class Ffmpeg < Formula
 
   depends_on "x264" => :recommended
   depends_on "lame" => :recommended
-  depends_on "libvo-aacenc" => :recommended
   depends_on "xvid" => :recommended
 
   depends_on "faac" => :optional
@@ -65,7 +67,6 @@ class Ffmpeg < Formula
   depends_on "libcaca" => :optional
   depends_on "libbluray" => :optional
   depends_on "libsoxr" => :optional
-  depends_on "libquvi" => :optional
   depends_on "libvidstab" => :optional
   depends_on "x265" => :optional
   depends_on "openssl" => :optional
@@ -73,6 +74,10 @@ class Ffmpeg < Formula
   depends_on "webp" => :optional
   depends_on "zeromq" => :optional
   depends_on "libbs2b" => :optional
+  depends_on "dcadec" => :optional
+  depends_on "rubberband" => :optional
+  depends_on "zimg" => :optional
+  depends_on "openh264" => :optional
 
   def install
     args = ["--prefix=#{prefix}",
@@ -84,14 +89,13 @@ class Ffmpeg < Formula
             "--enable-avresample",
             "--cc=#{ENV.cc}",
             "--host-cflags=#{ENV.cflags}",
-            "--host-ldflags=#{ENV.ldflags}"
+            "--host-ldflags=#{ENV.ldflags}",
            ]
 
     args << "--enable-opencl" if MacOS.version > :lion
 
     args << "--enable-libx264" if build.with? "x264"
     args << "--enable-libmp3lame" if build.with? "lame"
-    args << "--enable-libvo-aacenc" if build.with? "libvo-aacenc"
     args << "--enable-libxvid" if build.with? "xvid"
     args << "--enable-libsnappy" if build.with? "snappy"
 
@@ -114,13 +118,16 @@ class Ffmpeg < Formula
     args << "--enable-frei0r" if build.with? "frei0r"
     args << "--enable-libcaca" if build.with? "libcaca"
     args << "--enable-libsoxr" if build.with? "libsoxr"
-    args << "--enable-libquvi" if build.with? "libquvi"
     args << "--enable-libvidstab" if build.with? "libvidstab"
     args << "--enable-libx265" if build.with? "x265"
     args << "--enable-libwebp" if build.with? "webp"
     args << "--enable-libzmq" if build.with? "zeromq"
     args << "--enable-libbs2b" if build.with? "libbs2b"
+    args << "--enable-libdcadec" if build.with? "dcadec"
+    args << "--enable-librubberband" if build.with? "rubberband"
+    args << "--enable-libzimg" if build.with? "zimg"
     args << "--disable-indev=qtkit" if build.without? "qtkit"
+    args << "--enable-libopenh264" if build.with? "openh264"
 
     if build.with? "openjpeg"
       args << "--enable-libopenjpeg"
@@ -169,17 +176,17 @@ class Ffmpeg < Formula
 
   def caveats
     if build.without? "faac" then <<-EOS.undent
-      FFmpeg has been built without libfaac for licensing reasons;
-      libvo-aacenc is used by default.
-      To install with libfaac, you can:
-        brew reinstall ffmpeg --with-faac
+      The native FFmpeg AAC encoder has been stable since FFmpeg 3.0. If you
+      were using libvo-aacenc or libaacplus, both of which have been dropped in
+      FFmpeg 3.0, please consider switching to the native encoder (-c:a aac),
+      fdk-aac (-c:a libfdk_aac, ffmpeg needs to be installed with the
+      --with-fdk-aac option), or faac (-c:a libfaac, ffmpeg needs to be
+      installed with the --with-faac option).
 
-      You can also use the experimental FFmpeg encoder, libfdk-aac, or
-      libvo_aacenc to encode AAC audio:
-        ffmpeg -i input.wav -c:a aac -strict experimental output.m4a
-      Or:
-        brew reinstall ffmpeg --with-fdk-aac
-        ffmpeg -i input.wav -c:a libfdk_aac output.m4a
+      See the announcement
+      https://ffmpeg.org/index.html#removing_external_aac_encoders for details,
+      and https://trac.ffmpeg.org/wiki/Encode/AAC on best practices of encoding
+      AAC with FFmpeg.
       EOS
     end
   end

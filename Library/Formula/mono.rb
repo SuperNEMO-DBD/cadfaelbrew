@@ -1,29 +1,26 @@
 class Mono < Formula
   desc "Cross platform, open source .NET development framework"
   homepage "http://www.mono-project.com/"
-  url "http://download.mono-project.com/sources/mono/mono-4.2.1.102.tar.bz2"
-  sha256 "b7b461fe04375f621d88166ba8c6f1cb33c439fd3e17136460f7d087a51ed792"
+  url "http://download.mono-project.com/sources/mono/mono-4.2.2.30.tar.bz2"
+  sha256 "57858cd033be9915d7abdc5158c1faae8fa05757c3b7117cab3d703aa696c56b"
 
   # xbuild requires the .exe files inside the runtime directories to
   # be executable
   skip_clean "lib/mono"
 
   bottle do
-    sha256 "0a418eb2d030156ac263e908d5b4f8dec501ae24f4038d32192f5e810185aa12" => :el_capitan
-    sha256 "b17ba42ea772b596a03ff4b6991f44ab35f9243f07ef2083a833a42c3968a5a5" => :yosemite
-    sha256 "0f7bbf43d86dd0d4c229b63a1da030b7a5b04e4cba0fe031e47b90a3a5a8fa6f" => :mavericks
+    sha256 "b090cf8f95e8553a7907fbf3a06386a78b1cd55059900a1716adc3c02def7698" => :el_capitan
+    sha256 "3e9475e28d700e6f624800de33973afd38c62e5a6b2fbb96c714244bfb5a3a99" => :yosemite
+    sha256 "2e67605bea7caa18ddcd3e0345b4abdc1870940529ec3f44b93c25dbc785e778" => :mavericks
   end
+
+  conflicts_with "czmq", :because => "both install `makecert` binaries"
 
   option "without-fsharp", "Build without support for the F# language."
 
-  resource "monolite" do
-    url "http://download.mono-project.com/monolite/monolite-138-latest.tar.gz"
-    sha256 "a7b1b0c20f28747e783d91f6e8e40e4c788bd25ca6192b43d622ea842d434a48"
-  end
-
   resource "fsharp" do
-    url "https://github.com/fsharp/fsharp.git", :tag => "3.1.2.5",
-        :revision => "c5e345b194eaddad7f06d47cd944b098f3dbe325"
+    url "https://github.com/fsharp/fsharp.git", :tag => "4.0.1.0",
+        :revision => "b22167013d1f4f0c41107fd40935dc1a8fe46386"
   end
 
   depends_on "automake" => :build
@@ -37,11 +34,10 @@ class Mono < Formula
   link_overwrite "lib/mono"
   link_overwrite "lib/cli"
 
-  def install
-    # a working mono is required for the the build - monolite is enough
-    # for the job
-    (buildpath+"mcs/class/lib/monolite").install resource("monolite")
+  conflicts_with "disco", :because => "both install `disco` binaries"
+  conflicts_with "xsd", :because => "both install `xsd` binaries"
 
+  def install
     args = %W[
       --prefix=#{prefix}
       --disable-dependency-tracking
@@ -49,7 +45,7 @@ class Mono < Formula
       --enable-nls=no
     ]
 
-    args << "--build=" + (MacOS.prefer_64_bit? ? "x86_64": "i686") + "-apple-darwin"
+    args << "--build=" + (MacOS.prefer_64_bit? ? "x86_64": "i686") + "-apple-darwin" if OS.mac?
 
     system "./configure", *args
     system "make"

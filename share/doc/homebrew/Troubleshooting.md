@@ -1,33 +1,19 @@
 # Troubleshooting
-**If you saw `Error: uninitialized constant Formulary::HOMEBREW_CORE_FORMULA_REGEX. Please report this bug: ...` don't worry: it's [already been fixed](https://github.com/Homebrew/homebrew/commit/ac5707c37470c25583d8fb712bf5dc04ab91db4b). Please only create an issue (or comment on [the existing one](https://github.com/Homebrew/homebrew/issues/42553)) if running `brew update` again doesn't fix it. Thanks!**
+**Run `brew update` (twice) and `brew doctor` *before* creating an issue!**
 
-## Read this first!
+When creating a formula-related issue please include the link output by running:
 
-Please run `brew update` and `brew doctor` *before* creating an issue!
-
-If you create an issue related to a formula, please also create a [Gist][] by running
-
+```shell
+brew gist-logs <formula>
 ```
-brew gist-logs <formula name>
-```
-
-and include a link to the gist in the issue.
-
-Read on for more detailed instructions.
-
-Thank you!
 
 ## Check for common issues
-* Run `brew update` — then try again.
-* Run `brew doctor` — the doctor diagnoses common issues.
-* Read through the [Common Issues](Common-Issues.md) page.
-* If you’re installing something Java-related, maybe you need the [Java Developer Update][] or [JDK 7][]?
+* Run `brew update` (twice).
+* Run `brew doctor` and fix all the warnings (**outdated Xcode/CLT and unbrewed dylibs are very likely to cause problems**).
+* Read through the [Common Issues](Common-Issues.md).
+* If you’re installing something Java-related, maybe you need to install Java (`brew cask install java`)?
+* Check that **Command Line Tools for Xcode (CLT)** and/or **Xcode** are up to date.
 * If things fail with permissions errors, check the permissions in `/usr/local`. If you’re unsure what to do, you can `sudo chown -R $(whoami) /usr/local`.
-* If you see permission errors after upgrading to El Capitan please see the [El Capitan and Homebrew](El_Capitan_and_Homebrew.md) document.
-
-#### Listen to Dr. Brew
-
-* If `brew doctor` warns about unbrewed dylibs, be advised that they are **very likely to cause build problems**.
 
 ## Check to see if the issue has been reported
 * Browse open issues on the [issue tracker](https://github.com/SuperNEMO-DBD/Cadfaelbrew/issues) to see if someone else has already reported the same problem. Also browse the issue trackers on the upstream repositories for [OS X](https://github.com/Homebrew/homebrew/issues) and [Linux](https://github.com/Homebrew/linuxbrew/issues).
@@ -55,3 +41,4 @@ Thank you!
 [Apple Developer]:https://developer.apple.com/downloads
 [Java Developer Update]:https://support.apple.com/kb/DL1572
 [JDK 7]:https://docs.oracle.com/javase/7/docs/webnotes/install/mac/mac-install-faq.html
+

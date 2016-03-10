@@ -1,22 +1,15 @@
 class Pdf2htmlex < Formula
   desc "PDF to HTML converter"
   homepage "https://coolwanglu.github.io/pdf2htmlEX/"
-  url "https://github.com/coolwanglu/pdf2htmlEX/archive/v0.13.6.tar.gz"
-  sha256 "fc133a5791bfd76a4425af16c6a6a2460f672501b490cbda558213cb2b03d5d7"
-  revision 3
+  url "https://github.com/coolwanglu/pdf2htmlEX/archive/v0.14.6.tar.gz"
+  sha256 "320ac2e1c2ea4a2972970f52809d90073ee00a6c42ef6d9833fb48436222f0e5"
 
   head "https://github.com/coolwanglu/pdf2htmlEX.git"
 
   bottle do
-    sha256 "11a4583c47f559b362693610991d292b68413898d635be42a1fd157b4e537b2f" => :el_capitan
-    sha256 "ad75b68dd45816aeee6730953f9d3aa9df6a2ebdec450ce33cd902f727c2d673" => :yosemite
-    sha256 "da5c6edc1d82b834bcb6f01f2bb0dc8bfd47cbc051b12ecedc9b5b026381e4ec" => :mavericks
-  end
-
-  # Pdf2htmlex use an outdated, customised Fontforge installation.
-  # See https://github.com/coolwanglu/pdf2htmlEX/wiki/Building
-  resource "fontforge" do
-    url "https://github.com/coolwanglu/fontforge.git", :branch => "pdf2htmlEX"
+    sha256 "f47e13707f18b86f5dd60523eb22d70d19d4041765897b58c1367460788bf8ea" => :el_capitan
+    sha256 "3c144b96740872aba9bbf9b1dbefc3753b892865fdb7a70cd2e0626449a9d6d7" => :yosemite
+    sha256 "6bbf6198c132c3343b1bee113eeb56622194ac28909355576d39fc0b53e363ed" => :mavericks
   end
 
   depends_on :macos => :lion
@@ -37,16 +30,17 @@ class Pdf2htmlex < Formula
   depends_on "jpeg"     => :recommended
   depends_on "libtiff"  => :recommended
 
+  # Pdf2htmlex use an outdated, customised Fontforge installation.
+  # See https://github.com/coolwanglu/pdf2htmlEX/wiki/Building
+  resource "fontforge" do
+    url "https://github.com/coolwanglu/fontforge.git", :branch => "pdf2htmlEX"
+  end
+
   # And failures
   fails_with :llvm do
     build 2336
     cause "Compiling cvexportdlg.c fails with error: initializer element is not constant"
   end
-
-  # Fix a compilation failure with poppler 0.31.0+
-  # Upstream is aware of the issue and suggested this patch:
-  # https://github.com/coolwanglu/pdf2htmlEX/commit/d4fc82b#commitcomment-12239022
-  patch :DATA
 
   def install
     resource("fontforge").stage do
@@ -84,18 +78,3 @@ class Pdf2htmlex < Formula
     system "#{bin}/pdf2htmlEX", test_fixtures("test.pdf")
   end
 end
-
-__END__
-diff --git a/3rdparty/poppler/git/CairoFontEngine.cc b/3rdparty/poppler/git/CairoFontEngine.cc
-index 229a86c..7cc448b 100644
---- a/3rdparty/poppler/git/CairoFontEngine.cc
-+++ b/3rdparty/poppler/git/CairoFontEngine.cc
-@@ -421,7 +421,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
-   ref = *gfxFont->getID();
-   fontType = gfxFont->getType();
-
--  if (!(fontLoc = gfxFont->locateFont(xref, gFalse))) {
-+  if (!(fontLoc = gfxFont->locateFont(xref, nullptr))) {
-     error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
-	gfxFont->getName() ? gfxFont->getName()->getCString()
-	                       : "(unnamed)");

@@ -1,17 +1,17 @@
 class GstPluginsBase < Formula
   desc "GStreamer plugins (well-supported, basic set)"
-  homepage "http://gstreamer.freedesktop.org/"
-  url "https://download.gnome.org/sources/gst-plugins-base/1.6/gst-plugins-base-1.6.0.tar.xz"
-  sha256 "314fd1b707f65caf8eb6164d9422fc51e2b220a890ccd2de6ec03a2883d77231"
+  homepage "https://gstreamer.freedesktop.org/"
+  url "https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.6.3.tar.xz"
+  sha256 "b6154f8fdba4877e95efd94610ef0ada4f0171cd12eb829a3c3c97345d9c7a75"
 
   bottle do
-    sha256 "e1c9b62174870496f06c2a31c639b267559cf0d5bbd6344042d6798c528890c9" => :el_capitan
-    sha256 "d923837664e2ae437b3a9f8e5251794c50e721f761f601df9128ef0d2a60b7b1" => :yosemite
-    sha256 "b99d142014674fcecffb2920a6fae7c4862c4ca4f1f817690dbe5dfd931f14db" => :mavericks
+    sha256 "1b34263d61d3f133bcfd09823ba8448eb47be89888fe587563627bc0b965b0a9" => :el_capitan
+    sha256 "e16c9d499707a28e3b4645eeab8629d3adb146ee177c2732ea6d29a8081537e8" => :yosemite
+    sha256 "2d226d8f2387860bf109f18068ca7ffa48653c74f3c27c616e1e193e8958e19b" => :mavericks
   end
 
   head do
-    url "git://anongit.freedesktop.org/gstreamer/gst-plugins-base"
+    url "https://anongit.freedesktop.org/git/gstreamer/gst-plugins-base.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build

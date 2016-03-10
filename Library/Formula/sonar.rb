@@ -1,36 +1,27 @@
 class Sonar < Formula
   desc "Manage code quality"
   homepage "http://www.sonarqube.org/"
-  url "http://dist.sonar.codehaus.org/sonarqube-5.1.2.zip"
-  sha256 "a8d63d837242d0d07c0b3f65cfa9c84d5ae82ee51c6cbb52248bcf0d1bc58491"
+  url "https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-5.3.zip"
+  sha256 "4e61ee3a01d5e447bcd64357df77e0377325c4a2bb5ceb2cdeb5a5d193443ba5"
 
-  bottle do
-    cellar :any_skip_relocation
-    sha256 "fb4adb0d9ff4ce176b1b6acd675b68ee2cad2e489da94df118acfb98ee912523" => :el_capitan
-    sha256 "11fb73a3453a40950765be6bf38132b9aff0bdc8cc9b145769203af50b495187" => :yosemite
-    sha256 "0adbea02c047442482e499970016459a02e9178e4372df64105092ce0e6c4455" => :mavericks
-    sha256 "ae1b37b616b16a233a48913b872e26aa5345d5c8ef0daaa6cad4f4e2510eb16b" => :mountain_lion
-  end
+  depends_on :java => "1.7+"
+
+  bottle :unneeded
 
   def install
     # Delete native bin directories for other systems
-    rm_rf Dir["bin/{aix,hpux,linux,solaris,windows}-*"]
+    rm_rf Dir["bin/{aix,hpux,solaris,windows}-*"]
 
-    if MacOS.prefer_64_bit?
-      rm_rf "bin/macosx-universal-32"
-    else
-      rm_rf "bin/macosx-universal-64"
-    end
+    rm_rf "bin/macosx-universal-32" unless OS.mac? && !MacOS.prefer_64_bit?
+    rm_rf "bin/macosx-universal-64" unless OS.mac? && MacOS.prefer_64_bit?
+    rm_rf "bin/linux-x86-32" unless OS.linux? && !MacOS.prefer_64_bit?
+    rm_rf "bin/linux-x86-64" unless OS.linux? && MacOS.prefer_64_bit?
 
     # Delete Windows files
     rm_f Dir["war/*.bat"]
     libexec.install Dir["*"]
 
-    if MacOS.prefer_64_bit?
-      bin.install_symlink "#{libexec}/bin/macosx-universal-64/sonar.sh" => "sonar"
-    else
-      bin.install_symlink "#{libexec}/bin/macosx-universal-32/sonar.sh" => "sonar"
-    end
+    bin.install_symlink Dir[libexec/"bin/*/sonar.sh"].first => "sonar"
   end
 
   plist_options :manual => "sonar console"

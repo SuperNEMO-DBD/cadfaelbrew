@@ -1,20 +1,16 @@
 class Dos2unix < Formula
   desc "Convert text between DOS, UNIX, and Mac formats"
-  homepage "http://waterlan.home.xs4all.nl/dos2unix.html"
-  url "http://waterlan.home.xs4all.nl/dos2unix/dos2unix-7.3.1.tar.gz"
-  mirror "https://downloads.sourceforge.net/project/dos2unix/dos2unix/7.3.1/dos2unix-7.3.1.tar.gz"
-  sha256 "f4d5df24d181c2efecf7631aab6e894489012396092cf206829f1f9a98556b94"
+  homepage "https://waterlan.home.xs4all.nl/dos2unix.html"
+  url "https://waterlan.home.xs4all.nl/dos2unix/dos2unix-7.3.3.tar.gz"
+  mirror "https://downloads.sourceforge.net/project/dos2unix/dos2unix/7.3.3/dos2unix-7.3.3.tar.gz"
+  sha256 "5c910aea2eae96663c67e87627998c4fe3cded403be5819b4c190e56c82ff0fb"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "886a78adf2a767701e465fdf5c1023091df426236a72e05c91e259d0c9fe4f94" => :el_capitan
-    sha256 "f40a28d1464de115f92e86e24780021a06c068c71dbaa91dab2882c3666563ad" => :yosemite
-    sha256 "cc94e34364107792aa714a8e763389badef404097866c642d2446629c52aa21e" => :mavericks
-  end
-
-  devel do
-    url "http://waterlan.home.xs4all.nl/dos2unix/dos2unix-7.3.2-beta4.tar.gz"
-    sha256 "af033c7d992e72c666864f4a33e7a24a8c273909e1e45a5d497b12517076866e"
+    revision 1
+    sha256 "d039be7c3fbfed7196887792433d3838e8fe7df2c49a2af7112a0116e419146a" => :el_capitan
+    sha256 "7c2523cbddc1427e7070820215ce8ffd0eaddeb855202334a000d1604b0fb996" => :yosemite
+    sha256 "75ec10f6c40f4173643989f4d5a7c134f059e24432a1ac1647610da9a6d16ef5" => :mavericks
   end
 
   option "with-gettext", "Build with Native Language Support"

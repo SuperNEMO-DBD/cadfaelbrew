@@ -1,17 +1,17 @@
 class Gstreamer < Formula
   desc "GStreamer is a development framework for multimedia applications"
-  homepage "http://gstreamer.freedesktop.org/"
-  url "https://download.gnome.org/sources/gstreamer/1.6/gstreamer-1.6.0.tar.xz"
-  sha256 "52ef885647afef11c8b7645a9afefe04aa09e8971c4b932e7717872ab8a30fcc"
+  homepage "https://gstreamer.freedesktop.org/"
+  url "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.6.3.tar.xz"
+  sha256 "22f9568d67b87cf700a111f381144bd37cb93790a77e4e331db01fe854a37f24"
 
   bottle do
-    sha256 "6b75e4ba010fd85957d99abf356da19e4bb991031a5938bcd0c84e0e8ed25b8b" => :el_capitan
-    sha256 "370ba64ff63f4d80c445b317a0380afb91c92fd60b45dde385f9ff888975df87" => :yosemite
-    sha256 "32f9f7ee8a26494bac8ee4805b8a23569bbb2ab4cfd9779703d0be3ff772e0ae" => :mavericks
+    sha256 "cd910a2124e7b240c9c8087ed37629f0f443ff6b6c026d0aa1496ace732f43ea" => :el_capitan
+    sha256 "5b591159f6ec42693316c8a0e5bede93c2754adbbcf94c0e367a74f4b1a64206" => :yosemite
+    sha256 "7299e4fbcc7227ceb2ff3ce5e4f7398fa8ef9a4462706ea22b41e805aecf55f1" => :mavericks
   end
 
   head do
-    url "git://anongit.freedesktop.org/gstreamer/gstreamer"
+    url "https://anongit.freedesktop.org/git/gstreamer/gstreamer.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -23,11 +23,6 @@ class Gstreamer < Formula
   depends_on "gettext"
   depends_on "glib"
   depends_on "bison"
-
-  # Fix header file issue (exact OS versions affected unknown; first noticed on
-  # Snow Leopard)
-  # https://bugzilla.gnome.org/show_bug.cgi?id=756136
-  patch :DATA if MacOS.version <= :snow_leopard
 
   def install
     args = %W[
@@ -63,16 +58,3 @@ class Gstreamer < Formula
     system bin/"gst-inspect-1.0"
   end
 end
-__END__
-diff --git a/libs/gst/helpers/gst-ptp-helper.c b/libs/gst/helpers/gst-ptp-helper.c
-index 6c753df..5642741 100644
---- a/libs/gst/helpers/gst-ptp-helper.c
-+++ b/libs/gst/helpers/gst-ptp-helper.c
-@@ -37,6 +37,7 @@
- #include <sys/types.h>
- #include <errno.h>
- #include <sys/ioctl.h>
-+#include <sys/socket.h>
- #include <net/if.h>
- #include <netinet/in.h>
- #include <string.h>

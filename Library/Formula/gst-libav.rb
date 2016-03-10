@@ -1,17 +1,17 @@
 class GstLibav < Formula
   desc "GStreamer plugins for Libav (a fork of FFmpeg)"
-  homepage "http://gstreamer.freedesktop.org"
-  url "http://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.6.0.tar.xz"
-  sha256 "6cca6cf73182a882768ef0c860af88c2fd2c77e2c81ce464a998ab4e6baa604c"
+  homepage "https://gstreamer.freedesktop.org/"
+  url "https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.6.3.tar.xz"
+  sha256 "857b9c060a0337de38c6d26238c47352433c02eabf26c2f860c854dbc35bd4ab"
 
   bottle do
-    sha256 "0f24e12e8dcecd40a561fc75b53e0d2435da03236a0aa56bbafd02ffa31c2825" => :el_capitan
-    sha256 "b779cfa2dafc69decb29fd0fa6f18ed5da1b4c745ed2f3f663f3822651dd31ba" => :yosemite
-    sha256 "667ad19a7b15d2cba56aca4867f3efdaeef7b6690a3c9bf2403c42dc6673d561" => :mavericks
+    sha256 "04cfb1f456753fb8ef83827ac724e6cc50e517d4416aba9030d2cda2f78043fa" => :el_capitan
+    sha256 "276225949d2a1e68e94949b168714a3cb8e0641f58b4145ae506a2b022544afc" => :yosemite
+    sha256 "fe5bf35c1075d1f8a0c8d96b6500a5f4747e18235cb2498b72b767517fac1bae" => :mavericks
   end
 
   head do
-    url "git://anongit.freedesktop.org/gstreamer/gst-libav"
+    url "https://anongit.freedesktop.org/git/gstreamer/gst-libav.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -25,17 +25,12 @@ class GstLibav < Formula
   depends_on "xz" # For LZMA
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --disable-dependency-tracking
-    ]
-
     if build.head?
       ENV["NOCONFIGURE"] = "yes"
       system "./autogen.sh"
     end
 
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--disable-dependency-tracking"
     system "make"
     system "make", "install"
   end

@@ -25,7 +25,7 @@ class SoftwareSpec
   attr_reader :bottle_specification
   attr_reader :compiler_failures
 
-  def_delegators :@resource, :stage, :fetch, :verify_download_integrity
+  def_delegators :@resource, :stage, :fetch, :verify_download_integrity, :source_modified_time
   def_delegators :@resource, :cached_download, :clear_cache
   def_delegators :@resource, :checksum, :mirrors, :specs, :using
   def_delegators :@resource, :version, :mirror, *Checksum::TYPES
@@ -165,6 +165,7 @@ class SoftwareSpec
   end
 
   def patch(strip = :p1, src = nil, &block)
+    dependency_collector.add("gpatch" => :build) unless OS.mac?
     patches << Patch.create(strip, src, &block)
   end
 
@@ -185,12 +186,12 @@ class SoftwareSpec
   end
 
   def add_dep_option(dep)
-    name = dep.option_name
-
-    if dep.optional? && !option_defined?("with-#{name}")
-      options << Option.new("with-#{name}", "Build with #{name} support")
-    elsif dep.recommended? && !option_defined?("without-#{name}")
-      options << Option.new("without-#{name}", "Build without #{name} support")
+    dep.option_names.each do |name|
+      if dep.optional? && !option_defined?("with-#{name}")
+        options << Option.new("with-#{name}", "Build with #{name} support")
+      elsif dep.recommended? && !option_defined?("without-#{name}")
+        options << Option.new("without-#{name}", "Build without #{name} support")
+      end
     end
   end
 end
@@ -288,8 +289,8 @@ class BottleSpecification
   DEFAULT_CELLAR = "/usr/local/Cellar".freeze
   DEFAULT_DOMAIN_MAC = "https://homebrew.bintray.com"
   DEFAULT_DOMAIN_LINUX = "https://linuxbrew.bintray.com"
-  DEFAULT_DOMAIN = (OS.linux? ? DEFAULT_DOMAIN_LINUX : DEFAULT_DOMAIN_MAC).freeze
-  DEFAULT_ROOT_URL = "#{DEFAULT_DOMAIN}/bottles".freeze
+  DEFAULT_DOMAIN_OS = OS.linux? ? DEFAULT_DOMAIN_LINUX : DEFAULT_DOMAIN_MAC
+  DEFAULT_DOMAIN = (ENV["HOMEBREW_BOTTLE_DOMAIN"] || DEFAULT_DOMAIN_OS).freeze
 
   attr_rw :prefix, :cellar, :revision
   attr_accessor :tap
@@ -316,6 +317,8 @@ class BottleSpecification
 
   # Does the Bottle this BottleSpecification belongs to need to be relocated?
   def skip_relocation?
+    # Relocation is always required on Linux to locate glibc.
+    return false if OS.linux?
     cellar == :any_skip_relocation
   end
 
@@ -339,7 +342,7 @@ class BottleSpecification
   def checksums
     checksums = {}
     os_versions = collector.keys
-    os_versions.map! { |osx| MacOS::Version.from_symbol osx rescue nil }.compact!
+    os_versions.map! { |osx| MacOS::Version.from_symbol osx rescue osx.to_s }
     os_versions.sort.reverse_each do |os_version|
       osx = os_version.to_sym
       checksum = collector[osx]
@@ -347,5 +350,19 @@ class BottleSpecification
       checksums[checksum.hash_type] << { checksum => osx }
     end
     checksums
+  end
+end
+
+class PourBottleCheck
+  def initialize(formula)
+    @formula = formula
+  end
+
+  def reason(reason)
+    @formula.pour_bottle_check_unsatisfied_reason = reason
+  end
+
+  def satisfy(&block)
+    @formula.send(:define_method, :pour_bottle?, &block)
   end
 end

@@ -1,43 +1,31 @@
 class Bazel < Formula
   desc "Google's own build tool"
   homepage "http://bazel.io/"
-  url "https://github.com/bazelbuild/bazel/archive/0.1.1.tar.gz"
-  sha256 "49d11d467cf9e32dea618727198592577fbe76ff2e59217c53e3515ddf61cd95"
+  url "https://github.com/bazelbuild/bazel/archive/0.2.0.tar.gz"
+  sha256 "3685ce039e44224260a7ed5b80dd951155998a6e128b2bebe984ea1d85a674b3"
 
   bottle do
-    cellar :any
-    revision 1
-    sha256 "4e2ceee3d1a79339ab90377352b93631960bf4599853cea765116e7e6d0bc4ff" => :el_capitan
-    sha256 "63396e0919c7034ce3a6fd0a91567f1ffcd352a2b62230f7177d74d5be49d992" => :yosemite
-    sha256 "75f9ed1b50fef939e5806818835205fe11f4494bfe0aeb65ddfb4a8a1763146a" => :mavericks
+    cellar :any_skip_relocation
+    sha256 "c9390c4e57fa55597c674d184470577b1a3e1af6cdd7a4bb894500242a44574e" => :el_capitan
+    sha256 "458e4baa2e9a1a99903292bbdcf8d0bd855905d44b3f5cd0b3d96f2c3661928a" => :yosemite
   end
 
   depends_on :java => "1.8+"
+  depends_on :macos => :yosemite
 
   def install
-    # Replace the default system wide rc path to
-    # /usr/local/etc/bazel/bazel.bazelrc
-    inreplace "src/main/cpp/blaze_startup_options.cc",
-      "/etc/bazel.bazelrc",
-      "#{etc}/bazel/bazel.bazelrc"
-
     ENV["EMBED_LABEL"] = "#{version}-homebrew"
 
     system "./compile.sh"
+    system "./output/bazel", "build", "scripts:bash_completion"
 
-    (prefix/"base_workspace").mkdir
-    cp_r Dir["base_workspace/*"], (prefix/"base_workspace"), :dereference_root => true
     bin.install "output/bazel" => "bazel"
-    (prefix/"etc/bazel.bazelrc").write <<-EOS.undent
-      build --package_path=%workspace%:#{prefix}/base_workspace
-      query --package_path=%workspace%:#{prefix}/base_workspace
-      fetch --package_path=%workspace%:#{prefix}/base_workspace
-    EOS
-    (etc/"bazel").install prefix/"etc/bazel.bazelrc"
+    bash_completion.install "bazel-bin/scripts/bazel-complete.bash"
+    zsh_completion.install "scripts/zsh_completion/_bazel"
   end
 
   test do
-    (testpath/"WORKSPACE").write("")
+    touch testpath/"WORKSPACE"
 
     (testpath/"ProjectRunner.java").write <<-EOS.undent
       public class ProjectRunner {

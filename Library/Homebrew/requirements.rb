@@ -13,6 +13,7 @@ require "requirements/tuntap_requirement"
 require "requirements/unsigned_kext_requirement"
 require "requirements/x11_requirement"
 require "requirements/emacs_requirement"
+require "requirements/glibc_requirement"
 
 class XcodeRequirement < Requirement
   fatal true
@@ -65,6 +66,13 @@ class PostgresqlRequirement < Requirement
   default_formula "postgresql"
 
   satisfy { which "pg_config" }
+end
+
+class RbenvRequirement < Requirement
+  fatal true
+  default_formula "rbenv"
+
+  satisfy { which "rbenv" }
 end
 
 class GPGRequirement < Requirement
@@ -123,5 +131,5 @@ end
 class GitRequirement < Requirement
   fatal true
   default_formula "git"
-  satisfy { !!which("git") }
+  satisfy { Utils.git_available? }
 end

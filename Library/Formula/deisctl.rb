@@ -3,12 +3,14 @@ require "language/go"
 class Deisctl < Formula
   desc "Deis Control Utility"
   homepage "http://deis.io/"
-  url "https://github.com/deis/deis/archive/v1.10.0.tar.gz"
-  sha256 "afdb0ae576a9c05af2e634a3ac83df9bae99cef17cfd2f1e2c8b7713107e769b"
+  url "https://github.com/deis/deis/archive/v1.12.2.tar.gz"
+  sha256 "48aa8f81697b213bd25e95bc2065f7c0dc75e824d7420e71856e102cc16a5229"
 
   bottle do
     cellar :any_skip_relocation
-    revision 1
+    sha256 "0b87222a22e030527e1a0d323cd8a83f96ab832cd9c99dc1c488ced7b644f137" => :el_capitan
+    sha256 "982250bc46e2671adfe12b75b53726d1d27440b5d2b70e02f003cbd9801e3d84" => :yosemite
+    sha256 "ed153dd8ce280c4bb58d623bb8bc74607b70b3ccd9a762543767bc8abb372632" => :mavericks
   end
 
   depends_on "go" => :build

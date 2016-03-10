@@ -1,21 +1,20 @@
 class Autocode < Formula
   desc "Code automation for every language, library and framework"
-  homepage "https://crystal.sh/autocode"
-  url "https://github.com/crystal/autocode/archive/v0.20.3.tar.gz"
-  sha256 "f82f0fa7a2573d5f939a4821769756719ff98a98b0f1903001ee1e3981b30a23"
+  homepage "https://autocode.run"
+  url "https://github.com/ctate/autocode/archive/v1.1.4.tar.gz"
+  sha256 "a86dffccf34503d06d9b6d8f0562eff26616a1b7899bd26a24a06c7d424d2ac2"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "5aac71c4a2e4f3e084568de4757822c5f1aaa733db7b36a0b187151516499bac" => :el_capitan
-    sha256 "686a3de9b0eba6088f4fe2d130e76c75edb4233960db2daa615a8f5b5b99e590" => :yosemite
-    sha256 "e613bae16cfbe747f3e7ae43c4e1d34a9cbe736610641063737adfe788897dab" => :mavericks
+    sha256 "014e7875b0366e7ba2236b5ddee21e1bb70a4455194b812983c253e7aef8850d" => :el_capitan
+    sha256 "53706c84cd49daee1da97474559990f4b73c8ddee62967d59e435d8e6f94321b" => :yosemite
+    sha256 "b30ad165254fda87c034be334a42dd6c13fac15243a86f04adc48d9f4ce63965" => :mavericks
   end
 
   depends_on "node"
 
   def install
     ENV.prepend_path "PATH", "#{Formula["node"].opt_libexec}/npm/bin"
-
     system "npm", "install"
     libexec.install Dir["*", ".autocode"]
     bin.install_symlink Dir["#{libexec}/bin/*"]

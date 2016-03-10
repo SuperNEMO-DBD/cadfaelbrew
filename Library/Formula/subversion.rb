@@ -1,15 +1,15 @@
 class Subversion < Formula
   desc "Version control system designed to be a better CVS"
   homepage "https://subversion.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=subversion/subversion-1.9.2.tar.bz2"
-  mirror "https://archive.apache.org/dist/subversion/subversion-1.9.2.tar.bz2"
-  sha256 "023da881139b4514647b6f8a830a244071034efcaad8c8e98c6b92393122b4eb"
+  url "https://www.apache.org/dyn/closer.cgi?path=subversion/subversion-1.9.3.tar.bz2"
+  mirror "https://archive.apache.org/dist/subversion/subversion-1.9.3.tar.bz2"
+  sha256 "8bbf6bb125003d88ee1c22935a36b7b1ab7d957e0c8b5fbfe5cb6310b6e86ae0"
 
   bottle do
     revision 1
-    sha256 "231ddc0930b2e46d35778fd25b7521440afdd572325dd6741fb3eb8283905823" => :el_capitan
-    sha256 "14185bb5f0def4260da5bfa3b410ca690bb6cf2c069585e850d5fb1532457bde" => :yosemite
-    sha256 "744d0fd60fcd718589a04880897c0e56c256f3de53a8f884790d673700313254" => :mavericks
+    sha256 "954a141e7551a2355184d4d81c916220781969de535cbbd0a882ae82f58ca8dc" => :el_capitan
+    sha256 "26c1cab5285cec5eb8bf5d88a67c1520238b21db31268705b3ff16d2d1ad6412" => :yosemite
+    sha256 "d036ab9d228f61e63b12b8c6f845398424caaf7da68bdd8220ad6f5419583c89" => :mavericks
   end
 
   deprecated_option "java" => "with-java"
@@ -21,7 +21,12 @@ class Subversion < Formula
   option "with-perl", "Build Perl bindings"
   option "with-ruby", "Build Ruby bindings"
   option "with-gpg-agent", "Build with support for GPG Agent"
-  option "without-serf", "Build without the serf HTTP library"
+  if OS.linux?
+    # serf does not build. See https://github.com/Linuxbrew/linuxbrew/issues/182
+    option "with-serf", "Build with the serf HTTP library"
+  else
+    option "without-serf", "Build without the serf HTTP library"
+  end
 
   resource "serf" do
     url "https://serf.googlecode.com/svn/src_releases/serf-1.3.8.tar.bz2", :using => :curl
@@ -44,6 +49,7 @@ class Subversion < Formula
   unless OS.mac?
     depends_on "apr"
     depends_on "apr-util"
+    depends_on "zlib"
   end
 
   # Other optional dependencies
@@ -82,10 +88,6 @@ class Subversion < Formula
 
       ENV.universal_binary if build.universal?
 
-      # Fix perl bindings Makefile.pl failing with:
-      # Only one of PREFIX or INSTALL_BASE can be given.  Not both.
-      ENV.delete "PERL_MM_OPT"
-
       # scons ignores our compiler and flags unless explicitly passed
       args = %W[PREFIX=#{serf_prefix} GSSAPI=/usr CC=#{ENV.cc}
                 CFLAGS=#{ENV.cflags} LINKFLAGS=#{ENV.ldflags}
@@ -96,21 +98,9 @@ class Subversion < Formula
         args << "APU=#{Formula["apr-util"].opt_prefix}"
       end
 
-      scons *args
+      scons(*args)
       scons "install"
     end if build.with? "serf"
-
-    if build.include? "unicode-path"
-      raise <<-EOS.undent
-        The --unicode-path patch is not supported on Subversion 1.8.
-
-        Upgrading from a 1.7 version built with this patch is not supported.
-
-        You should stay on 1.7, install 1.7 from homebrew-versions, or
-          brew rm subversion && brew install subversion
-        to build a new version of 1.8 without this patch.
-      EOS
-    end
 
     if build.with? "java"
       # Java support doesn't build correctly in parallel:
@@ -131,15 +121,17 @@ class Subversion < Formula
     # Use existing system zlib
     # Use dep-provided other libraries
     # Don't mess with Apache modules (since we're not sudo)
-    args = ["--disable-debug",
-            "--prefix=#{prefix}",
-            "--with-zlib=/usr",
-            "--with-sqlite=#{Formula["sqlite"].opt_prefix}",
-            ("--with-serf=#{serf_prefix}" if build.with? "serf"),
-            "--disable-mod-activation",
-            "--disable-nls",
-            "--without-apache-libexecdir",
-            "--without-berkeley-db"]
+    args = %W[
+      --disable-debug
+      --prefix=#{prefix}
+      #{"--with-zlib=/usr" if OS.mac?}
+      --with-sqlite=#{Formula["sqlite"].opt_prefix}
+      #{"--with-serf=#{serf_prefix}" if build.with? "serf"}
+      --disable-mod-activation
+      --disable-nls
+      --without-apache-libexecdir
+      --without-berkeley-db
+    ]
 
     args << "--enable-javahl" << "--without-jikes" if build.with? "java"
     args << "--without-gpg-agent" if build.without? "gpg-agent"
@@ -210,11 +202,10 @@ class Subversion < Formula
           "$(SWIG_INCLUDES) #{arches} -g -pipe -fno-common -DPERL_DARWIN -fno-strict-aliasing -I/usr/local/include -I#{perl_core}"
       end
       system "make", "swig-pl"
-      system "make", "install-swig-pl", "DESTDIR=#{prefix}"
+      system "make", "install-swig-pl"
 
       # Some of the libraries get installed into the wrong place, they end up having the
       # prefix in the directory name twice.
-
       lib.install Dir["#{prefix}/#{lib}/*"]
     end
 

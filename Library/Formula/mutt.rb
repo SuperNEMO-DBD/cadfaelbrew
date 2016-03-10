@@ -23,10 +23,10 @@ class Mutt < Formula
   end
 
   head do
-    url "http://dev.mutt.org/hg/mutt#default", :using => :hg
+    url "https://dev.mutt.org/hg/mutt#default", :using => :hg
 
     resource "html" do
-      url "http://dev.mutt.org/doc/manual.html", :using => :nounzip
+      url "https://dev.mutt.org/doc/manual.html", :using => :nounzip
     end
   end
 
@@ -70,24 +70,32 @@ class Mutt < Formula
   end
 
   def install
-    args = ["--disable-dependency-tracking",
-            "--disable-warnings",
-            "--prefix=#{prefix}",
-            "--with-ssl=#{Formula["openssl"].opt_prefix}",
-            (OS.mac? ? "--with-sasl" : "--with-sasl2"),
-            "--with-gss",
-            "--enable-imap",
-            "--enable-smtp",
-            "--enable-pop",
-            "--enable-hcache",
-            "--with-tokyocabinet",
-            # This is just a trick to keep 'make install' from trying
-            # to chgrp the mutt_dotlock file (which we can't do if
-            # we're running as an unprivileged user)
-            "--with-homespool=.mbox"]
-    args << "--disable-nls" if build.without? "gettext"
+    begin
+        user_admin = Etc.getgrnam("admin").mem.include?(ENV["USER"])
+    rescue
+        user_admin = false
+    end
 
-    args << "--with-slang" if build.with? "s-lang"
+    args = %W[
+      --disable-dependency-tracking
+      --disable-warnings
+      --prefix=#{prefix}
+      --with-ssl=#{Formula["openssl"].opt_prefix}
+      #{OS.mac? ? "--with-sasl" : "--with-sasl2"}
+      --with-gss
+      --enable-imap
+      --enable-smtp
+      --enable-pop
+      --enable-hcache
+      --with-tokyocabinet
+    ]
+
+    # This is just a trick to keep 'make install' from trying
+    # to chgrp the mutt_dotlock file (which we can't do if
+    # we're running as an unprivileged user)
+    args << "--with-homespool=.mbox" unless user_admin
+
+    args << "--disable-nls" if build.without? "gettext"
     args << "--enable-gpgme" if build.with? "gpgme"
     args << "--with-slang" if build.with? "s-lang"
 
@@ -99,8 +107,15 @@ class Mutt < Formula
 
     system "./prepare", *args
     system "make"
-    system "make", "install"
 
+    # This permits the `mutt_dotlock` file to be installed under a group
+    # that isn't `mail`.
+    # https://github.com/Homebrew/homebrew/issues/45400
+    if user_admin
+      inreplace "Makefile", /^DOTLOCK_GROUP =.*$/, "DOTLOCK_GROUP = admin"
+    end
+
+    system "make", "install"
     doc.install resource("html") if build.head?
   end
 

@@ -1,27 +1,28 @@
 class Passenger < Formula
   desc "Server for Ruby, Python, and Node.js apps via Apache/NGINX"
   homepage "https://www.phusionpassenger.com/"
-  url "https://s3.amazonaws.com/phusion-passenger/releases/passenger-5.0.20.tar.gz"
-  sha256 "a5b35780beb7ecd39d18375acab3e4fa1a2e104b7a324f41a1f89c99e7b8b04c"
+  url "https://s3.amazonaws.com/phusion-passenger/releases/passenger-5.0.26.tar.gz"
+  sha256 "de3b63b65ff27d193096361a330d9db1dc07076c1ba9be5ecee90322d91dbbc9"
   head "https://github.com/phusion/passenger.git"
 
   bottle do
     cellar :any
-    sha256 "8a3559b46c71a6c998d81ac89b62baec7cabefbb39b21550ba0c4e4ae4bf174b" => :el_capitan
-    sha256 "503be746c0521813e11ab0533932a50c8ac6812b57b1206d959907904360d8b3" => :yosemite
-    sha256 "86d41ece182c24a5466afd481fd9a3234ecd6d4c3c90faaf38b959ebf0e807d7" => :mavericks
+    sha256 "c8b3444ec39bfa5826e82ce30263c4fe4f5681239ad5a42e6d7b9912d8848431" => :el_capitan
+    sha256 "2832dfe19e71200c3fe23638f2dd522e31ad1a92e28dfce037698352ceb0230a" => :yosemite
+    sha256 "1453c2607f659f0ef55bfd4901e55d34b9943a3087eeb6399b0c8957f6ee08bf" => :mavericks
   end
+
+  option "without-apache2-module", "Disable Apache2 module"
 
   depends_on "pcre"
   depends_on "openssl"
   depends_on :macos => :lion
 
-  option "without-apache2-module", "Disable Apache2 module"
-
   def install
     rake "apache2" if build.with? "apache2-module"
     rake "nginx"
-    rake "webhelper"
+
+    system("/usr/bin/ruby ./bin/passenger-config compile-nginx-engine")
 
     (libexec/"download_cache").mkpath
 
@@ -70,7 +71,7 @@ class Passenger < Formula
     s += <<-EOS.undent if build.with? "apache2-module"
       To activate Phusion Passenger for Apache, create /etc/apache2/other/passenger.conf:
         LoadModule passenger_module #{opt_libexec}/buildout/apache2/mod_passenger.so
-        PassengerRoot #{opt_libexec}/lib/phusion_passenger/locations.ini
+        PassengerRoot #{opt_libexec}/src/ruby_supportlib/phusion_passenger/locations.ini
         PassengerDefaultRuby /usr/bin/ruby
 
       EOS
