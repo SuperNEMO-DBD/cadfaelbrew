@@ -50,8 +50,8 @@ git_init_if_necessary() {
     git init
     git config --bool core.autocrlf false
     case $(uname -s) in
-      Darwin) git config remote.origin.url https://github.com/Homebrew/homebrew.git ;;
-      Linux) git config remote.origin.url https://github.com/Linuxbrew/linuxbrew.git ;;
+      Darwin) git config remote.origin.url https://github.com/SuperNEMO-DBD/cadfaelbrew.git ;;
+      Linux) git config remote.origin.url https://github.com/SuperNEMO-DBD/cadfaelbrew.git ;;
     esac
     git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
     git fetch origin
@@ -64,7 +64,7 @@ git_init_if_necessary() {
 
   if [[ "$(git remote show origin -n)" = *"mxcl/homebrew"* ]]
   then
-    git remote set-url origin https://github.com/Homebrew/homebrew.git &&
+    git remote set-url origin https://github.com/SuperNEMO-DBD/cadfaelbrew.git &&
     git remote set-url --delete origin ".*mxcl\/homebrew.*"
   fi
 }
@@ -325,6 +325,12 @@ EOS
   # this procedure will be removed in the future if it seems unnecessary
   rename_taps_dir_if_necessary
 
+  # Tap supernemo if neccessary
+  if [[ ! -d "$HOMEBREW_LIBRARY/Taps/supernemo-dbd/homebrew-cadfael" ]]
+  then
+    brew tap --full SuperNEMO-DBD/cadfael || odie "Could not Tap SuperNEMO-DBD/cadfael!"
+  fi
+  
   # kill all of subprocess on interrupt
   trap '{ pkill -P $$; wait; exit 130; }' SIGINT
 
