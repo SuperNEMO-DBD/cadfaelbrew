@@ -77,6 +77,9 @@ class FormulaInstaller
     return true if Homebrew::Hooks::Bottles.formula_has_bottle?(formula)
 
     return false if @pour_failed
+    
+    # In Cadfaelbrew, always want to build from source on linux (for now) 
+    return false if OS.linux?
 
     bottle = formula.bottle
     return false unless bottle
