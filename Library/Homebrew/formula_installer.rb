@@ -74,13 +74,13 @@ class FormulaInstaller
   end
 
   def pour_bottle?(install_bottle_options = { :warn=>false })
+    # In Cadfaelbrew, always want to build from source on linux (for now) 
+    return false if OS.linux?
+
     return true if Homebrew::Hooks::Bottles.formula_has_bottle?(formula)
 
     return false if @pour_failed
     
-    # In Cadfaelbrew, always want to build from source on linux (for now) 
-    return false if OS.linux?
-
     bottle = formula.bottle
     return false unless bottle
     return true  if force_bottle?
@@ -114,6 +114,7 @@ class FormulaInstaller
 
   def install_bottle_for?(dep, build)
     return pour_bottle? if dep == formula
+    return false if OS.linux?
     return false if build_from_source?
     return false unless dep.bottle && dep.pour_bottle?
     return false unless build.used_options.empty?
