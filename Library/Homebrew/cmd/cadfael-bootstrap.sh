@@ -524,8 +524,6 @@ doCheckSystemSoftware () {
   fi
 }
 
-
-
 #-----------------------------------------------------------------------
 # BREW BOOTSTRAPPING
 #-----------------------------------------------------------------------
@@ -635,7 +633,7 @@ doBootstrapCadfael() {
 #-----------------------------------------------------------------------
 doBrewBootstrap() {
   _echo_info "bootstrapping brew"
-
+  brew update || _echo_exit "Failed to update brew"
   doCreateCompilerLinks "$HOMEBREW_PREFIX/bin"
   doBootstrapRuby || _echo_exit "Unable to bootstrap ruby"
   doBootstrapGit || _echo_exit "Unable to bootstrap git"
