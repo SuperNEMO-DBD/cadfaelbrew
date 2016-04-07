@@ -624,8 +624,9 @@ doCreateCompilerLinks () {
 # Bootstrap cadfael basic toolchain
 #-----------------------------------------------------------------------
 doBootstrapCadfael() {
-  brew install cadfael || _echo_exit "Failed to install cadfael formula"
-  brew install git-flow-avh
+  brew install cadfael      || _echo_exit "Failed to install cadfael formula"
+  brew install ninja        || _echo_exit "Failed to install ninja formula"
+  brew install git-flow-avh || _echo_exit "Failed to install git-flow-avh formula"
 }
 
 #-----------------------------------------------------------------------
@@ -633,10 +634,12 @@ doBootstrapCadfael() {
 #-----------------------------------------------------------------------
 doBrewBootstrap() {
   _echo_info "bootstrapping brew"
-  brew update || _echo_exit "Failed to update brew"
   doCreateCompilerLinks "$HOMEBREW_PREFIX/bin"
   doBootstrapRuby || _echo_exit "Unable to bootstrap ruby"
   doBootstrapGit || _echo_exit "Unable to bootstrap git"
+
+  # Must update after bootstrapping ruby/git
+  brew update || _echo_exit "Failed to update brew"
   doBootstrapCadfael || _echo_exit "Unable to bootstrap cadfael"
 }
 
