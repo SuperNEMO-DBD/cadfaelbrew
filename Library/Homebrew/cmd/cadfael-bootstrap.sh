@@ -668,10 +668,10 @@ doCreateCompilerLinks () {
 # Bootstrap cadfael basic toolchain
 #-----------------------------------------------------------------------
 doBootstrapCadfael() {
-  #brew install cadfael      || _echo_exit "Failed to install cadfael formula"
-  #brew install ninja        || _echo_exit "Failed to install ninja formula"
-  #brew install git-flow-avh || _echo_exit "Failed to install git-flow-avh formula"
-  brew ls
+  echo_info "About to bootstrap cadfael toolchain. This may take some time"
+  brew cadfael-bootstrap-toolchain || _echo_exit "Failed to bootstrap cadfael toolchain"
+  echo_info "Bootstrap of toolchain complete, installed formulae"
+  brew ls --versions
 }
 
 #-----------------------------------------------------------------------
