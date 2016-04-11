@@ -668,9 +668,9 @@ doCreateCompilerLinks () {
 # Bootstrap cadfael basic toolchain
 #-----------------------------------------------------------------------
 doBootstrapCadfael() {
-  echo_info "About to bootstrap cadfael toolchain. This may take some time"
+  _echo_info "About to bootstrap cadfael toolchain. This may take some time"
   brew cadfael-bootstrap-toolchain || _echo_exit "Failed to bootstrap cadfael toolchain"
-  echo_info "Bootstrap of toolchain complete, installed formulae"
+  _echo_info "Bootstrap of toolchain complete, installed formulae"
   brew ls --versions
 }
 
