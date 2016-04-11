@@ -72,9 +72,10 @@ readonly _kRHELIDREGEX='(RedHatEnterprise[[:alpha:]]*|CentOS|Scientific[[:alpha:
 
 declare -a kSUPPORTEDSYSTEMS
 readonly kSUPPORTEDSYSTEMS=("MacOSX-10\.(9|10|11)" \
-                            "${_kRHELIDREGEX}-[5-7]\.[0-9][0-9]?" \
+                            "${_kRHELIDREGEX}-[6-7]\.[0-9][0-9]?" \
                             "SUSELINUX-11" \
-                            "Ubuntu-14\.04")
+                            "Ubuntu-14\.04" \
+                            "Ubuntu-16\.04")
 
 # - Operating System ID, Version and Packaging System
 doInit() {
@@ -424,6 +425,47 @@ doCheckSUSELINUX-11 () {
 #-----------------------------------------------------------------------
 # Ubuntu Checks
 #-----------------------------------------------------------------------
+# - Ubuntu 16.04 (Xenial)
+doCheckUbuntu-14.04 () {
+  _echo_warning "Support for Ubuntu 16.04 is preliminary"
+  _echo_info "Checking system software for Ubuntu 16.04"
+
+  local debList=("build-essential" \
+                 "curl" \
+                 "git" \
+                 "m4" \
+                 "libbz2-dev" \
+                 "libcurl4-openssl-dev" \
+                 "libexpat-dev" \
+                 "libncurses-dev" \
+                 "ruby2.0" \
+                 "texinfo" \
+                 "zlib1g-dev" \
+                 "libx11-dev" \
+                 "libxpm-dev" \
+                 "libxft-dev" \
+                 "libxext-dev" \
+                 "libpng12-dev" \
+                 "libjpeg-dev")
+
+  for pkg in "${debList[@]}"  ; do
+    if ! checkDeb $pkg ; then
+      local missingPkgs="$pkg ${missingPkgs}"
+    fi
+  done
+
+  if [ -n "$missingPkgs" ] ; then
+    _echo_error "Debs '$missingPkgs' are not installed on this system"
+    _echo_error "Please run (or get your sysadmin to run):
+
+  $kPACKAGEMANAGER install -y $missingPkgs
+  "
+    return 1
+  fi
+
+  return 0
+}
+
 # 14.04 (Trusty LTS)
 doCheckUbuntu-14.04 () {
   _echo_info "Checking system software for Ubuntu 14.04"
@@ -559,6 +601,8 @@ doBootstrapRuby () {
   _echo_info "System ruby o.k."
   return 0
 
+  # - Legacy ruby bootstrap, currently all supported platforms can 
+  #   brew ruby from their system installs
   #local rubyBSDir="$1"
   #local rubySrcDir="$rubyBSDir/src"
   #git clone https://github.com/postmodern/ruby-install.git "$rubyBSDir"
@@ -624,9 +668,10 @@ doCreateCompilerLinks () {
 # Bootstrap cadfael basic toolchain
 #-----------------------------------------------------------------------
 doBootstrapCadfael() {
-  brew install cadfael      || _echo_exit "Failed to install cadfael formula"
-  brew install ninja        || _echo_exit "Failed to install ninja formula"
-  brew install git-flow-avh || _echo_exit "Failed to install git-flow-avh formula"
+  #brew install cadfael      || _echo_exit "Failed to install cadfael formula"
+  #brew install ninja        || _echo_exit "Failed to install ninja formula"
+  #brew install git-flow-avh || _echo_exit "Failed to install git-flow-avh formula"
+  brew ls
 }
 
 #-----------------------------------------------------------------------
