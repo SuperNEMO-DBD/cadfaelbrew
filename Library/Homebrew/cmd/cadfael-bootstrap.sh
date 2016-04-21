@@ -343,6 +343,7 @@ doCheckRedHat-7 () {
                  "ruby-irb" \
                  "glibc-static" \
                  "libstdc++-static" \
+                 "which" \
                  "HEP_OSlibs")
 
   for pkg in "${rpmList[@]}"  ; do
