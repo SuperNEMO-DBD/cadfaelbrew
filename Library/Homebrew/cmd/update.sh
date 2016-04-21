@@ -21,7 +21,10 @@ which_git() {
     git_path="git"
   fi
 
-  git_path="$(command -v "$git_path" 2>/dev/null)"
+  # For a currently unknown reason, raw command -v will not
+  # output full path. Running it through Bash produces full
+  # paths, and I have no idea why...
+  git_path="$(bash command -v "$git_path" 2>/dev/null)"
 
   if [[ -n "$git_path" ]]
   then
