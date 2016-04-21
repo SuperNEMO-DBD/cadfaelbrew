@@ -21,7 +21,7 @@ which_git() {
     git_path="git"
   fi
 
-  git_path="$(which "$git_path" 2>/dev/null)"
+  git_path="$(command -v "$git_path" 2>/dev/null)"
 
   if [[ -n "$git_path" ]]
   then
