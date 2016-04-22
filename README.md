@@ -4,15 +4,13 @@ Cadfaelbrew is a fork of [Homebrew](http://brew.sh), the Mac OS package manager,
 
 It can be installed in your home directory and does not require root access. The same package manager can be used on both your Linux server and your Mac laptop. Installing a modern version of *glibc* and *gcc* in your home directory on an old distribution of Linux takes five minutes.
 
-Features, usage and installation instructions are [summarised on the homepage](http://linuxbrew.sh).
+Features, usage and installation instructions are summarised below.
 
-To receive updates of major changes to Linuxbrew subscribe to the [Linuxbrew Updates](https://github.com/Linuxbrew/linuxbrew/issues/864) issue on GitHub.
+Cadfaelbrew follows upstream linuxbrew with some lag depending on production requirements.
+Merges typically happen on 2-3 month cycles. To receive updates of major changes to Linuxbrew subscribe 
+to the [Linuxbrew Updates](https://github.com/Linuxbrew/linuxbrew/issues/864) issue on GitHub.
 
-Install Cadfaelbrew (tl;dr)
---------------------------
-See [the dedicated installer guide](https://github.com/SuperNEMO-DBD/cadfael-installer)
-
-See [Dependencies](#dependencies) and [Installation](#installation) below for more details.
+If you require an update that's in linuxbrew and not yet merged into Cadfaelbrew, please raise an issue.
 
 Features
 --------
@@ -20,6 +18,30 @@ Features
 + Install software not packaged by the native distribution
 + Install up-to-date versions of software when the native distribution is old
 + Use the same package manager to manage both your Mac and Linux machines
+
+
+Install Cadfaelbrew (tl;dr)
+--------------------------
+```sh
+$ git clone https://github.com/SuperNEMO-DBD/cadfaelbrew.git ~/CadfaelBrew
+```
+
+Add to your `.bashrc` or `.zshrc`:
+
+```sh
+export PATH="$HOME/CadfaelBrew/bin:$PATH"
+export MANPATH="$HOME/CadfaelBrew/share/man:$MANPATH"
+export INFOPATH="$HOME/CadfaelBrew/share/info:$INFOPATH"
+```
+
+```sh
+$ brew cadfael-bootstrap
+$ brew install falaise
+```
+
+You're done! Unless you saw errors, in which case review [Dependencies](#dependencies) and [Installation](#installation)
+below for more details. The second command installs the main SuperNEMO software package, Falaise, which is provided in
+a [dedicated `tap` for SuperNEMO](https://github.com/SuperNEMO-DBD/homebrew-cadfael).
 
 Dependencies
 ------------
@@ -33,20 +55,54 @@ Dependencies
   + **Linux** 2.6.16 or newer
   + **64-bit x86** or **32-bit ARM** platform
 
-The [dedicated installer](https://github.com/SuperNEMO-DBD/cadfael-installer) will check everything for you
-and report any missing items. The actual packages checked for on Linux systems are listed below
+A dedicated brew command `cadfael-bootstrap` is provided to check system dependencies and will 
+check everything for you and report any missing items with some instructions on how to install them.
+The actual packages required and checked for on Linux systems are listed below including the command(s)
+needed to install them.
 
-### Debian or Ubuntu
-
-```sh
-sudo apt-get install build-essential curl git python-setuptools ruby
-```
-
-### Fedora, CentOS or Red Hat
+### Ubuntu
 
 ```sh
-sudo yum groupinstall 'Development Tools' && sudo yum install curl git irb python-setuptools ruby
+sudo apt-get install \
+  build-essential \
+  curl \
+  git \
+  python-setuptools \
+  ruby2.0 \
+  m4 \
+  libbz2-dev \
+  libcurl4-openssl-dev \
+  libexpat-dev \
+  libncurses-dev \
+  texinfo \
+  zlib1g-dev \
+  libx11-dev \
+  libxpm-dev \
+  libxft-dev \
+  libxext-dev \
+  libpng12-dev \
+  libjpeg-dev
 ```
+
+### CentOS or Red Hat
+
+```sh
+sudo yum groupinstall 'Development Tools' 
+sudo yum install \
+  curl \
+  git \
+  irb \
+  python-setuptools \
+  ruby \
+  redhat-lsb-core \
+```
+
+On RedHat/CentOS/Scientific, you will also require the `HEP_OSlibs` meta package from CERN.
+Installation instructions for this are dependent on whether you are running version 6 or 7 of
+these distros:
+
+- [Instructions for CentOS 6](https://twiki.cern.ch/twiki/bin/view/LCG/SL6DependencyRPM)
+- [Instructions for CentOS 7](https://twiki.cern.ch/twiki/bin/view/LCG/CentOS7DependencyRPM)
 
 ### 32-bit x86 platforms
 
@@ -55,9 +111,7 @@ Cadfaelbrew does not currently support 32-bit x86 platforms.
 Bottles
 -------
 
-Bottles are Linuxbrew's precompiled binary packages. Linuxbrew bottles work on any Linux system. They do however require `glibc` 2.19 or better. On systems with an older version of `glibc`, Linuxbrew will install `glibc` the first time that you install a bottled formula. If you prefer to use the `glibc` provided by your system and build all formulas from source, add to your `.bashrc` or `.zshrc`:
-
-`export HOMEBREW_BUILD_FROM_SOURCE=1`
+Bottles are Homebrew/Linuxbrew's precompiled binary packages. Cadfaelbrew currently only provides these for OS X.
 
 Installation
 ------------
