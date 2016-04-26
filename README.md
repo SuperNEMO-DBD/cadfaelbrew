@@ -38,10 +38,11 @@ export INFOPATH="$HOME/CadfaelBrew/share/info:$INFOPATH"
 $ brew cadfael-bootstrap
 $ brew install falaise
 ```
+The second command installs the main SuperNEMO software package, Falaise, which is provided in
+a [dedicated `tap` for SuperNEMO](https://github.com/SuperNEMO-DBD/homebrew-cadfael). 
 
 You're done! Unless you saw errors, in which case review [Dependencies](#dependencies) and [Installation](#installation)
-below for more details. The second command installs the main SuperNEMO software package, Falaise, which is provided in
-a [dedicated `tap` for SuperNEMO](https://github.com/SuperNEMO-DBD/homebrew-cadfael).
+below for more details. If these do not solve the issue, please read the [Troubleshooting Checklist](https://github.com/SuperNEMO-DBD/cadfaelbrew/blob/master/share/doc/homebrew/Troubleshooting.md#troubleshooting) and submit an Issue following the instructions there if required.
 
 Dependencies
 ------------
