@@ -11,6 +11,8 @@
 # --junit:         Generate a JUnit XML test results file.
 # --no-bottle:     Run brew install without --build-bottle
 # --keep-old:      Run brew bottle --keep-old to build new bottles for a single platform.
+# --legacy         Bulid formula from legacy Homebrew/homebrew repo.
+#                  (TODO remove it when it's not longer necessary)
 # --HEAD:          Run brew install with --HEAD
 # --local:         Ask Homebrew to write verbose logs under ./logs/ and set HOME to ./home/
 # --tap=<tap>:     Use the git repository of the given tap
@@ -287,6 +289,10 @@ module Homebrew
       elsif travis_pr
         @url = "https://github.com/#{ENV["TRAVIS_REPO_SLUG"]}/pull/#{ENV["TRAVIS_PULL_REQUEST"]}"
         @hash = nil
+      elsif ENV["CI_PULL_REQUEST"] && !ENV["CI_PULL_REQUEST"].empty?
+        # Circle CI build of a pull request.
+        @url = ENV["CI_PULL_REQUEST"]
+        @hash = nil
       elsif ENV["GIT_BRANCH"] && ENV["GIT_BRANCH"].include?(":")
         # Docker automated build of a pull request
         user, branch = ENV["GIT_BRANCH"].split(":")
@@ -334,7 +340,11 @@ module Homebrew
         # the right commit to BrewTestBot.
         unless travis_pr
           diff_start_sha1 = current_sha1
-          test "brew", "pull", "--clean", @url
+          if ARGV.include?("--legacy")
+            test "brew", "pull", "--clean", "--legacy", @url
+          else
+            test "brew", "pull", "--clean", @url
+          end
           diff_end_sha1 = current_sha1
         end
         @short_url = @url.gsub("https://github.com/", "")
@@ -402,7 +412,12 @@ module Homebrew
     def formula(formula_name)
       @category = "#{__method__}.#{formula_name}"
 
-      test "brew", "uses", "--recursive", formula_name
+      if OS.linux?
+        # --recursive is very slow. See https://github.com/Linuxbrew/linuxbrew/issues/939
+        test "brew", "uses", formula_name
+      else
+        test "brew", "uses", "--recursive", formula_name
+      end
 
       formula = Formulary.factory(formula_name)
 
@@ -638,8 +653,15 @@ module Homebrew
       git "rebase", "--abort"
       git "reset", "--hard"
       git "checkout", "-f", "master"
-      git "clean", "-ffdx" unless ENV["HOMEBREW_RUBY"] == "1.8.7"
-      pr_locks = "#{HOMEBREW_REPOSITORY}/.git/refs/remotes/*/pr/*/*.lock"
+      git "clean", "-ffdx"
+      HOMEBREW_REPOSITORY.cd do
+        safe_system "git", "reset", "--hard"
+        safe_system "git", "checkout", "-f", "master"
+        # This will uninstall all formulae, as long as
+        # HOMEBREW_REPOSITORY == HOMEBREW_PREFIX, which is true on the test bots
+        safe_system "git", "clean", "-ffdx", "--exclude=/Library/Taps/" unless ENV["HOMEBREW_RUBY"] == "1.8.7"
+      end
+      pr_locks = "#{@repository}/.git/refs/remotes/*/pr/*/*.lock"
       Dir.glob(pr_locks) { |lock| FileUtils.rm_rf lock }
     end
 
@@ -659,6 +681,10 @@ module Homebrew
         test "brew", "cleanup", "--prune=7"
         git "gc", "--auto"
         test "git", "clean", "-ffdx"
+        HOMEBREW_REPOSITORY.cd do
+          safe_system "git", "reset", "--hard"
+          safe_system "git", "clean", "-ffdx", "--exclude=/Library/Taps/"
+        end
         if ARGV.include? "--local"
           FileUtils.rm_rf ENV["HOMEBREW_HOME"]
           FileUtils.rm_rf ENV["HOMEBREW_LOGS"]
@@ -733,10 +759,22 @@ module Homebrew
   end
 
   def test_ci_upload(tap)
+    if ENV["GIT_BRANCH"]
+      if ENV["GIT_BRANCH"].include?(":")
+        # Docker automated build of a pull request.
+        docker_user, docker_branch = ENV["GIT_BRANCH"].split(":")
+      else
+        # Docker automated build of master.
+        docker_user = nil
+        docker_branch = ENV["GIT_BRANCH"]
+      end
+      docker_sha1 = ENV["GIT_SHA1"]
+    end
+
     jenkins = ENV["JENKINS_HOME"]
     job = ENV["UPSTREAM_JOB_NAME"]
     id = ENV["UPSTREAM_BUILD_ID"]
-    raise "Missing Jenkins variables!" if !jenkins || !job || !id
+    raise "Missing Jenkins, Circle or Docker variables!" if (!jenkins || !job || !id) && !ENV["CIRCLE_BUILD_NUM"] && !docker_branch
 
     bintray_user = ENV["BINTRAY_USER"]
     bintray_key = ENV["BINTRAY_KEY"]
@@ -752,18 +790,28 @@ module Homebrew
 
     ARGV << "--verbose"
     ARGV << "--keep-old" if ENV["UPSTREAM_BOTTLE_KEEP_OLD"]
+    ARGV << "--legacy" if ENV["UPSTREAM_BOTTLE_LEGACY"]
 
-    bottles = Dir["#{jenkins}/jobs/#{job}/configurations/axis-version/*/builds/#{id}/archive/*.bottle*.*"]
-    return if bottles.empty?
-    FileUtils.cp bottles, Dir.pwd, :verbose => true
+    if jenkins
+      bottles = Dir["#{jenkins}/jobs/#{job}/configurations/axis-version/*/builds/#{id}/archive/*.bottle*.*"]
+      return if bottles.empty?
+      FileUtils.cp bottles, Dir.pwd, :verbose => true
+    else
+      return if Dir["*.bottle*.*"].empty?
+    end
 
-    ENV["GIT_AUTHOR_NAME"] = ENV["GIT_COMMITTER_NAME"] = "BrewTestBot"
-    ENV["GIT_AUTHOR_EMAIL"] = ENV["GIT_COMMITTER_EMAIL"] = "brew-test-bot@googlegroups.com"
+    if OS.mac?
+      ENV["GIT_AUTHOR_NAME"] = ENV["GIT_COMMITTER_NAME"] = "BrewTestBot"
+      ENV["GIT_AUTHOR_EMAIL"] = ENV["GIT_COMMITTER_EMAIL"] = "brew-test-bot@googlegroups.com"
+    elsif OS.linux?
+      ENV["GIT_AUTHOR_NAME"] = ENV["GIT_COMMITTER_NAME"] = "LinuxbrewTestBot"
+      ENV["GIT_AUTHOR_EMAIL"] = ENV["GIT_COMMITTER_EMAIL"] = "testbot@linuxbrew.sh"
+    end
     ENV["GIT_WORK_TREE"] = tap.path
     ENV["GIT_DIR"] = "#{ENV["GIT_WORK_TREE"]}/.git"
 
-    pr = ENV["UPSTREAM_PULL_REQUEST"]
-    number = ENV["UPSTREAM_BUILD_NUMBER"]
+    pr = ENV["UPSTREAM_PULL_REQUEST"] || ENV["CIRCLE_PR_NUMBER"]
+    number = ENV["UPSTREAM_BUILD_NUMBER"] || ENV["CIRCLE_BUILD_NUM"]
 
     quiet_system "git", "am", "--abort"
     quiet_system "git", "rebase", "--abort"
@@ -772,25 +820,35 @@ module Homebrew
     safe_system "brew", "update"
 
     if pr
-      pull_pr = if tap.core_tap?
-        pr
+      if ARGV.include?("--legacy")
+        pull_pr = "https://github.com/Homebrew/homebrew/pull/#{pr}"
+        safe_system "brew", "pull", "--clean", "--legacy", pull_pr
       else
-        "https://github.com/#{tap.user}/homebrew-#{tap.repo}/pull/#{pr}"
+        pull_pr = "https://github.com/#{tap.user}/homebrew-#{tap.repo}/pull/#{pr}"
+        safe_system "brew", "pull", "--clean", pull_pr
       end
-      safe_system "brew", "pull", "--clean", pull_pr
+    elsif docker_sha1
+      url = if tap.core_tap?
+        "https://github.com/#{docker_user}/linuxbrew/commit/#{docker_sha1}"
+      else
+        "https://github.com/#{docker_user}/homebrew-#{tap.repo}/commit/#{docker_sha1}"
+      end
+      safe_system "brew", "pull", "--clean", url
     end
 
     bottle_args = ["--merge", "--write", *Dir["*.bottle.rb"]]
     bottle_args << "--keep-old" if ARGV.include? "--keep-old"
     system "brew", "bottle", *bottle_args
 
-    remote_repo = tap.core_tap? ? "homebrew" : "homebrew-#{tap.repo}"
-    remote = "git@github.com:BrewTestBot/#{remote_repo}.git"
-    tag = pr ? "pr-#{pr}" : "testing-#{number}"
+    project = OS.mac? ? "homebrew" : "linuxbrew"
+    remote_repo = tap.core_tap? ? project : "homebrew-#{tap.repo}"
+    remote = "git@github.com:#{ENV["GIT_AUTHOR_NAME"]}/#{remote_repo}.git"
+    tag = docker_branch ? "pr-#{docker_user}-#{docker_branch}" : pr ? "pr-#{pr}" : "testing-#{number}"
     safe_system "git", "push", "--force", remote, "master:master", ":refs/tags/#{tag}"
 
+    bintray_org = project
     bintray_repo = Bintray.repository(tap)
-    bintray_repo_url = "https://api.bintray.com/packages/homebrew/#{bintray_repo}"
+    bintray_repo_url = "https://api.bintray.com/packages/#{bintray_org}/#{bintray_repo}"
     formula_packaged = {}
 
     Dir.glob("*.bottle*.tar.gz") do |filename|
@@ -803,7 +861,7 @@ module Homebrew
                 "#{BottleSpecification::DEFAULT_DOMAIN}/#{bintray_repo}/#{filename}"
         raise <<-EOS.undent
           #{filename} is already published. Please remove it manually from
-          https://bintray.com/homebrew/#{bintray_repo}/#{bintray_package}/view#files
+          https://bintray.com/#{bintray_org}/#{bintray_repo}/#{bintray_package}/view#files
         EOS
       end
 
@@ -812,6 +870,7 @@ module Homebrew
         unless system "curl", "--silent", "--fail", "--output", "/dev/null", package_url
           package_blob = <<-EOS.undent
             {"name": "#{bintray_package}",
+             #{'"licenses":["BSD 2-Clause"], "vcs_url":"https://github.com/Linuxbrew/linuxbrew.git",' if OS.linux?}
              "public_download_numbers": true,
              "public_stats": true}
           EOS
@@ -823,7 +882,7 @@ module Homebrew
         formula_packaged[formula_name] = true
       end
 
-      content_url = "https://api.bintray.com/content/homebrew"
+      content_url = "https://api.bintray.com/content/#{bintray_org}"
       content_url += "/#{bintray_repo}/#{bintray_package}/#{version}/#{filename}"
       content_url += "?override=1"
       curl "--silent", "--fail", "-u#{bintray_user}:#{bintray_key}",
@@ -872,9 +931,17 @@ module Homebrew
     p ARGV
 
     tap = resolve_test_tap
-    # Tap repository if required, this is done before everything else
-    # because Formula parsing and/or git commit hash lookup depends on it.
-    safe_system "brew", "tap", tap.name unless tap.installed?
+    if tap.installed?
+      # make sure Tap is not a shallow clone.
+      # bottle revision and bottle upload rely on full clone.
+      if (tap.path/".git/shallow").exist?
+        safe_system "git", "-C", tap.path, "fetch", "--unshallow"
+      end
+    else
+      # Tap repository if required, this is done before everything else
+      # because Formula parsing and/or git commit hash lookup depends on it.
+      safe_system "brew", "tap", tap.name, "--full"
+    end
 
     if ARGV.include? "--ci-upload"
       return test_ci_upload(tap)

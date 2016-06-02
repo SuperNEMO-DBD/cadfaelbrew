@@ -3,8 +3,8 @@ class Opam < Formula
   homepage "https://opam.ocaml.org"
   url "https://github.com/ocaml/opam/archive/1.2.2.tar.gz"
   sha256 "3e4a05df6ff8deecba019d885ebe902eb933acb6e2fc7784ffee1ee14871e36a"
-  head "https://github.com/ocaml/opam.git"
   revision 1
+  head "https://github.com/ocaml/opam.git"
 
   bottle do
     cellar :any_skip_relocation
@@ -12,10 +12,12 @@ class Opam < Formula
     sha256 "2be7ee48f1102131153515736589e8766112cb86c45a7e0b2cc4ed424ad063ec" => :el_capitan
     sha256 "28ac4e9f4aa5d36b654d4dcefc0f33105eb84583b4ae542d709de79c14883f04" => :yosemite
     sha256 "71d0c0fb91faef76d207078c354c8ef8a64a8cb2959126358669378a209bda53" => :mavericks
+    sha256 "93e3425dd61d927c1c7d4d8b1b9c213ed151d3a3ffe4ac5428751d12087996c7" => :x86_64_linux
   end
 
   depends_on "ocaml" => :recommended
   depends_on "camlp4" => :recommended if build.with? "ocaml"
+  depends_on "homebrew/dupes/unzip" unless OS.mac?
 
   # aspcud has a fairly large buildtime dep tree, and uses gringo,
   # which requires C++11 and is inconvenient to install pre-10.8
@@ -96,10 +98,6 @@ class Opam < Formula
     zsh_completion.install "shell/opam_completion_zsh.sh" => "_opam"
   end
 
-  test do
-    system "#{bin}/opam", "--help"
-  end
-
   def caveats; <<-EOS.undent
     OPAM uses ~/.opam by default for its package database, so you need to
     initialize it first by running (as a normal user):
@@ -117,5 +115,9 @@ class Opam < Formula
     Documentation and tutorials are available at https://opam.ocaml.org, or
     via "man opam" and "opam --help".
     EOS
+  end
+
+  test do
+    system "#{bin}/opam", "--help"
   end
 end

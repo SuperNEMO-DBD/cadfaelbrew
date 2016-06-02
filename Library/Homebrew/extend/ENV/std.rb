@@ -58,16 +58,19 @@ module Stdenv
 
     if OS.linux? && !["glibc", "glibc25"].include?(formula && formula.name)
       if formula
-        # Work around a bug in glibc 2.19 fixed in 2.20:
+        # To work around a bug in glibc 2.19 that is fixed in 2.20
+        # add both lib and prefix to LD_LIBRARY_PATH.
         # segfault when LD_LIBRARY_PATH is set to non-existent directory.
         # See https://github.com/Linuxbrew/linuxbrew/issues/841
-        FileUtils.mkdir_p formula.lib
-        # Add this formula's library directory to the shared library search path.
+        prepend_create_path "LD_LIBRARY_PATH", formula.prefix
         prepend "LD_LIBRARY_PATH", formula.lib, File::PATH_SEPARATOR
       end
 
+      # Set the search path for header files.
+      prepend_path "CPATH", HOMEBREW_PREFIX/"include"
       # Set the dynamic linker and library search path.
       append "LDFLAGS", "-Wl,--dynamic-linker=#{HOMEBREW_PREFIX}/lib/ld.so -Wl,-rpath,#{HOMEBREW_PREFIX}/lib"
+      prepend_path "LIBRARY_PATH", HOMEBREW_PREFIX/"lib"
       prepend_path "LD_RUN_PATH", HOMEBREW_PREFIX/"lib"
     end
 
@@ -100,7 +103,7 @@ module Stdenv
     paths = []
     paths << "#{HOMEBREW_PREFIX}/lib/pkgconfig"
     paths << "#{HOMEBREW_PREFIX}/share/pkgconfig"
-    paths << "#{HOMEBREW_LIBRARY}/ENV/pkgconfig/#{MacOS.version}"
+    paths << "#{HOMEBREW_ENV_PATH}/pkgconfig/#{MacOS.version}"
     paths << "/usr/lib/pkgconfig" if OS.mac?
     paths.select { |d| File.directory? d }.join(File::PATH_SEPARATOR)
   end

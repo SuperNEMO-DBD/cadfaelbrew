@@ -166,7 +166,9 @@ class SoftwareSpec
 
   def patch(strip = :p1, src = nil, &block)
     dependency_collector.add("gpatch" => :build) unless OS.mac?
-    patches << Patch.create(strip, src, &block)
+    p = Patch.create(strip, src, &block)
+    dependency_collector.add(p.resource) if p.is_a? ExternalPatch
+    patches << p
   end
 
   def fails_with(compiler, &block)
@@ -285,8 +287,10 @@ class Bottle
 end
 
 class BottleSpecification
-  DEFAULT_PREFIX = "/usr/local".freeze
-  DEFAULT_CELLAR = "/usr/local/Cellar".freeze
+  DEFAULT_PREFIX_MAC = "/usr/local".freeze
+  DEFAULT_PREFIX_LINUX = "/home/linuxbrew/.linuxbrew".freeze
+  DEFAULT_PREFIX = (OS.linux? ? DEFAULT_PREFIX_LINUX : DEFAULT_PREFIX_MAC).freeze
+  DEFAULT_CELLAR = "#{DEFAULT_PREFIX}/Cellar".freeze
   DEFAULT_DOMAIN_MAC = "https://homebrew.bintray.com"
   DEFAULT_DOMAIN_LINUX = "https://linuxbrew.bintray.com"
   DEFAULT_DOMAIN_OS = OS.linux? ? DEFAULT_DOMAIN_LINUX : DEFAULT_DOMAIN_MAC

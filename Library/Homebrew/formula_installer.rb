@@ -131,7 +131,7 @@ class FormulaInstaller
 
   def verify_deps_exist
     begin
-      formula.recursive_dependencies.map(&:to_formula)
+      compute_dependencies
     rescue TapFormulaUnavailableError => e
       if e.tap.installed?
         raise
@@ -352,17 +352,16 @@ class FormulaInstaller
 
     deps = []
 
-    # Installing bottles on Linux require a recent version of glibc.
-    glibc = GlibcRequirement.new
-    unless glibc.satisfied?
-      glibc_dep = glibc.to_dependency
-      glibc_f = glibc_dep.to_formula
-      deps += Dependency.expand(glibc_f) << glibc_dep
-    end
-
     # patchelf is used to set the RPATH and dynamic linker of
     # executables and shared libraries on Linux.
     deps << Dependency.new("patchelf")
+
+    # Installing bottles on Linux require a recent version of glibc and gcc.
+    # GCC is required for libgcc_s.so and libstdc++.so. It depends on glibc.
+    unless GlibcRequirement.new.satisfied?
+      gcc_dep = Dependency.new("gcc")
+      deps += Dependency.expand(gcc_dep.to_formula) << gcc_dep
+    end
 
     deps = deps.select do |dep|
       options = inherited_options[dep.name] = inherited_options_for(dep)
@@ -383,7 +382,7 @@ class FormulaInstaller
         dependent,
         inherited_options.fetch(dependent.name, [])
       )
-      poured_bottle = true if install_bottle_for?(dependent, build)
+      poured_bottle = true if install_bottle_for?(dep.to_formula, build)
 
       if (dep.optional? || dep.recommended?) && build.without?(dep)
         Dependency.prune
